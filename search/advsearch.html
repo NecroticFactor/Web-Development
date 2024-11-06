@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Google Advanced Search</title>
+    <link rel="stylesheet" href="advsearch.css" />
+  </head>
+  <body>
+    <div class="main-area">
+      <header>
+        <div class="header-texts">
+          <div>
+            <a class="header-link" href="index.html"
+              ><img
+                src="https://www.gstatic.com/images/branding/googlelogo/svg/googlelogo_light_clr_74x24px.svg"
+            /></a>
+          </div>
+          <div class="adv-logo">
+            <span>Advanced Search</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="divider"></div>
+
+      <div class="form-box">
+        <div class="form-heading">
+          <div class="form-label-heading-left">Find pages with...</div>
+          <div class="form-label-heading-right">
+            To do this in the search box.
+          </div>
+        </div>
+        <form action="https://www.google.com/search">
+          <div class="form-input">
+            <div class="input-label">
+              <label for="first">all these words:</label>
+            </div>
+            <div class="input-box">
+              <input class="text-input" type="text" id="first" name="as_q" />
+            </div>
+            <div class="input-right-text">
+              Type the important words:
+              <span class="white-text">tri-colour rat terrier</span>
+            </div>
+          </div>
+
+          <div class="form-input">
+            <div><label for="second">this exact word or phrase:</label></div>
+            <div>
+              <input class="text-input" type="text" id="second" name="as_epq" />
+            </div>
+            <div class="input-right-text">
+              Put exact words in quotes:
+              <span class="white-text">"rat terrier"</span>
+            </div>
+          </div>
+
+          <div class="form-input">
+            <div><label for="third">any of these words:</label></div>
+            <div>
+              <input class="text-input" type="text" id="third" name="as_oq" />
+            </div>
+            <div class="input-right-text">
+              Type <span class="white-text">OR</span> between all the words you
+              want:
+              <span class="white-text">miniature OR standard</span>
+            </div>
+          </div>
+
+          <div class="form-input">
+            <div><label for="fourth">none of these words:</label></div>
+            <div>
+              <input class="text-input" type="text" id="fourth" name="as_eq" />
+            </div>
+            <div class="input-right-text">
+              Put a minus sign just before words that you don't want:
+              <span class="white-text">-rodent, -"Jack Russell"</span>
+            </div>
+          </div>
+
+          <div class="form-input">
+            <div><label for="fifth">numbers ranging from:</label></div>
+            <div class="two-box">
+              <div>
+                <input class="to-input" type="text" id="fifth" name="as_nlo" />
+              </div>
+              <span id="to">to</span>
+              <div>
+                <input class="to-input" type="text" id="fifth" name="as_nhi" />
+              </div>
+            </div>
+            <div class="input-right-text">
+              Put two full stops between the numbers and add a unit of
+              measurement:
+              <div>
+                <span class="white-text"
+                  >10..35 kg, £300..£500, 2010..2011</span
+                >
+              </div>
+            </div>
+          </div>
+          <div>
+            <input
+              class="submit-button"
+              type="submit"
+              value="Advanced Search"
+              id="search-button"
+            />
+          </div>
+          <div class="divider2"></div>
+        </form>
+      </div>
+    </div>
+
+    <div>
+      <a class="homepage-link" href="index.html"><h3>Google Search</h3></a>
+    </div>
+  </body>
+</html>

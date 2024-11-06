@@ -1,0 +1,154 @@
+*{
+    margin:0px;
+    padding:0px;
+    box-sizing:border-box;
+    background-color: #202124; 
+}
+
+
+.header-texts {
+    max-width: 50%;
+    margin: 20px 20px;
+    font-family: sans-serif ;
+    font-size: 20px;
+}
+
+.header-link {
+    text-decoration: none;
+    color: white;
+}
+
+.adv-logo {
+    margin: 40px 25px 20px 25px; 
+    color: #f28b82;
+}
+
+.divider {
+    border-top: 1px solid black;
+}
+
+.divider2 {
+    border-top: 1px solid black;
+    max-width: 1170px;
+    margin-top: 20px;
+}
+
+.form-box {
+    margin-top: 40px;
+    margin-left: 20px;
+}
+
+.form-heading {
+    display: flex;
+    color: white;
+    font-family: sans-serif;
+    font-size: 15px;
+}
+
+.form-label-heading-left {
+    margin-left:20px ;
+}
+
+.form-label-heading-right {
+   position: relative;
+   left: 630px;
+}
+
+.form-input {
+    display: grid;
+    grid-template-columns: 200px auto 1fr;
+    align-items: center;
+}
+
+.two-box {
+    display: flex;
+    margin: 10px 10px;
+}
+
+#to {
+    display: grid;
+    margin: 0 15px;
+    align-items: center;
+    color: #969ba1;
+    font-family: sans-serif;
+    font-size: 13px;
+}
+
+.to-input {
+    width: 254px;
+    height: 30px;
+    padding: 5px;
+    border: 1px solid #5f6368;
+    font-family: sans-serif;
+    font-size: 12px;
+    color: white;
+}
+
+label {
+    margin-left: 20px;
+    color: #969ba1;
+    font-family: sans-serif;
+    font-size: 13px;
+}
+
+.text-input {
+    width: 550px;
+    margin: 10px 10px;
+    padding: 5px;
+    height: 30px;
+    border: 1px solid #5f6368;
+    font-family: sans-serif;
+    font-size: 12px;
+    color: white;
+    
+}
+
+.input-right-text {
+    color: #969ba1;
+    font-family: sans-serif;
+    font-size: 10px;
+}
+
+.white-text {
+    color: white;
+    font-family: monospace;
+}
+
+
+
+.homepage-link {
+    display: flex;
+    position: absolute;
+    top: 20px;
+    right:20px;
+    text-decoration: none;
+    color: white;
+    font-family: sans-serif ;
+    font-size: 12px;
+}
+
+
+.submit-button {
+    display: inline-block;
+    position: relative;
+    margin-left: 653px;
+    margin-top: 10px;
+    border-radius: 3px;
+    border: 1px solid #2f5bb7;
+    height: 30px;
+    padding: 6px;
+    max-width: 120px;
+    background-color: #8ab4f8;
+    color: #202124;
+    font-family: sans-serif;
+    font-weight: bold;
+}
+
+.submit-button:hover {
+    background-color: #aecbfa
+}
+
+.homepage-link:hover h3 {
+    text-decoration: underline;
+}
+

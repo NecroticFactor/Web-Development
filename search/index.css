@@ -1,0 +1,141 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #202124; 
+    color: #FFFFFF; 
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    text-align: center;
+    position: relative; 
+    margin-top: 10px;
+}
+
+img {
+    margin-top: 60px;
+    margin-bottom: 20px;
+    width: 272px; 
+    height: 92px;
+}
+
+.searchbox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 700px;
+}
+
+input[type="text"] {
+    width: 550px;
+    height: 50px;
+    padding: 20px;
+    font-size: 16px;
+    font-family: Google Sans,Arial,sans-serif;
+    border: none;
+    border-radius: 24px;
+    background-color: #2d2e2f;;
+    border-radius: 24px;
+    color: #FFFFFF; 
+    outline: none;
+    margin-bottom: 20px;
+}
+
+input[type="text"]:hover {
+    background-color: #454546; 
+}
+
+input[type="submit"] {
+    font-size: 14px;
+    padding: 8px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #303134; 
+    color: #E8EAED; 
+}
+
+input[type="submit"]:hover {
+    background-color: #3C4043; 
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.page-links-right {
+    display: flex;
+    position: absolute;
+    top: 20px;
+    right: 30px;
+}
+
+.page-links-left {
+    display: flex;
+    position: absolute;
+    top: 20px;
+    left: 30px;
+}
+
+
+.page-links-right a, 
+.page-links-left a,
+.location a, 
+.footer-right a,
+.footer-left a {
+    margin: 0 15px;
+    text-decoration: none;
+    color: #f7f8f9; 
+}
+
+.page-links-right h3, 
+.page-links-left h3,
+.footer-box-top h3, 
+.footer-right h3,
+.footer-left h3 {
+    font-size: 15px;
+    font-weight: bold;
+    font-weight: normal;
+}
+
+.page-links-right a:hover h3, 
+.page-links-left a:hover h3, 
+.footer-right a:hover h3, 
+.footer-left a:hover h3 {
+    text-decoration: underline;
+}
+
+.location {
+    display:flex;
+    position: absolute;
+    bottom: 50px;
+    left: 30px;
+    margin: 10px;
+
+}
+
+.footer-left {
+    display:flex;
+    position: absolute;
+    bottom: 20px;
+    left: 14px;
+    margin: 10px;
+}
+
+.footer-right {
+    display: flex;
+    position: absolute;
+    bottom: 20px;
+    right: 30px;
+    margin: 10px;
+}
+
