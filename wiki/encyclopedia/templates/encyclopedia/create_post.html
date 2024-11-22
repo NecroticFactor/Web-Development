@@ -1,0 +1,35 @@
+{% extends "encyclopedia/layout.html" %} {% load static %} {%block title%}Create
+Post{%endblock%} {%block body%}
+<h1>Create Your Post</h1>
+<div>
+  <form action="{% url 'encyclopedia:create_post' %}" method="POST">
+    {% csrf_token %}
+    <div>
+      <label id="title-label" for="title-field">Title</label>
+      <input
+        class="title"
+        type="text"
+        id="title-field"
+        name="title"
+        maxlength="100"
+        value=""
+        required
+      />
+    </div>
+    <label for="large-input">Description</label>
+    <div>
+      <textarea
+        class="description"
+        name="description"
+        rows="5"
+        cols="30"
+        placeholder="Enter the description"
+      ></textarea>
+    </div>
+    <div>
+      <button type="submit">Submit</button>
+    </div>
+  </form>
+</div>
+
+{%endblock%}
