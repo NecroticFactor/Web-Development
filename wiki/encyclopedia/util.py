@@ -37,6 +37,10 @@ def get_entry(title):
     except FileNotFoundError:
         return None
 
+def delete_entry(title):
+    filename = f"entries/{title}.md"
+    if default_storage.exists(filename):
+        default_storage.delete(filename)
 
 def convert_to_html(content):
    """

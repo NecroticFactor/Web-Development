@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, Http404
-
+from django.contrib import messages
+import random
 
 from . import util
 
@@ -45,7 +46,7 @@ def search(request):
         return render(request, 'encyclopedia/error.html',)
 
 
-def create_post(request):
+def create_page(request):
     if request.method == 'POST':
         title = request.POST.get('title')
         body = request.POST.get('description')
@@ -56,7 +57,7 @@ def create_post(request):
 
 
 
-def update_post(request, title):
+def update_page(request, title):
     if request.method == 'POST':
         body = request.POST.get('description')
         util.save_entry(title, body)
@@ -73,3 +74,17 @@ def update_post(request, title):
             "description": "Content not found for this title."
         }
     return render(request, 'encyclopedia/update_post.html', context)
+
+
+def delete_page(request, title):
+    util.delete_entry(title)
+    messages.success(request, f"The page '{title}' was successfully deleted.")
+    return redirect("encyclopedia:index")
+
+
+def random_page(request):
+    entries = util.list_entries()
+    print(entries)
+    if entries:
+        title = random.choice(entries)
+        return detail(request,title)

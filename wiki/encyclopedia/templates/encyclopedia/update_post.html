@@ -2,7 +2,7 @@
 {%block body%}
 <h1>Update Post</h1>
 <div>
-  <form action="{% url 'encyclopedia:update_post' title=title %}" method="POST">
+  <form action="{% url 'encyclopedia:update_page' title=title %}" method="POST">
     {% csrf_token %}
     <div>
       <textarea class="description" name="description" rows="5" cols="30">

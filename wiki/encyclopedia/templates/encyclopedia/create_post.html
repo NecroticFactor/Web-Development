@@ -2,7 +2,7 @@
 Post{%endblock%} {%block body%}
 <h1>Create Your Post</h1>
 <div>
-  <form action="{% url 'encyclopedia:create_post' %}" method="POST">
+  <form action="{% url 'encyclopedia:create_page' %}" method="POST">
     {% csrf_token %}
     <div>
       <label id="title-label" for="title-field">Title</label>

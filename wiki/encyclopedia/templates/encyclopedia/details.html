@@ -1,6 +1,15 @@
 {% extends "encyclopedia/layout.html" %} {% block title %} {{ title }}
 {%endblock%} {% block body %}
 <p>{{ detail | safe }}</p>
-
-<a href="{% url 'encyclopedia:update_post' title=title %}">Edit</a>
+<div>
+  <a href="{% url 'encyclopedia:update_page' title=title %}">Edit</a>
+</div>
+<div>
+  <a
+    href="{% url 'encyclopedia:delete_page' title=title %}"
+    onclick="return confirm('Are you sure you want to delete this page?');"
+  >
+    Delete Page
+  </a>
+</div>
 {% endblock %}

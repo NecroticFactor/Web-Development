@@ -15,8 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from encyclopedia import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include("encyclopedia.urls"))
+    path('', views.index, name='index'),
+    path('wiki/', include("encyclopedia.urls")),
 ]
