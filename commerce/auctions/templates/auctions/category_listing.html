@@ -1,8 +1,5 @@
-{% extends "auctions/layout.html" %} {% block title %} Active Listing
-{%endblock%} {% block body %}
-
-<h2>Active Listings</h2>
-{% for listing in all_listings %}
+{% extends "auctions/layout.html" %} {% block title %} Category Listings
+{%endblock%} {%block body%} {% for listings in category_lisitng %}
 <div class="listing-container">
   <div class="img-container">
     <img
@@ -16,12 +13,12 @@
     <h6>Category: {{ listing.category }}</h6>
     <p>Description: {{ listing.description }}</p>
     <h5>Price: {{listing.price }}</h5>
-    {% if max_bid %}
-    <h4>Bid: ${{ max_bid.bid }}</h4>
+    {% if item.max_bid %}
+    <h4>Bid: ${{ listing.max_bid.bid }}</h4>
     {% else %}
     <p>No bids yet.</p>
     {% endif %}
     <h6>Created {{ listing.created_at|date:"F d, Y, h:i A" }}</h6>
   </div>
 </div>
-{% endfor %} {% endblock %}
+{% endblock %}

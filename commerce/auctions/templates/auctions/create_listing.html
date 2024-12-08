@@ -1,0 +1,66 @@
+{% extends "auctions/layout.html" %} {% block title %} Create Listing
+{%endblock%} {% block body %}
+
+<h2>Create Listing</h2>
+
+{% if success_message %}
+    <div class="success">{{ success_message }}</div>
+{% endif %}
+
+{% if error_message %}
+    <div class="error">{{ error_message }}</div>
+{% endif %}
+
+<form action="{% url 'create_listing' %}" method="post">
+  {% csrf_token %}
+  <div class="form-group-listing">
+    <input
+      class="form-item-listing"
+      type="text"
+      autofocus
+      name="title"
+      placeholder="Title"
+      required
+    />
+  </div>
+  <div class="form-group-listing">
+    <label for="description">Description:</label>
+    <textarea
+      class="form-item-listing"
+      name="description"
+      required
+    /></textarea>
+  </div>
+  <div class="form-group-listing">
+    <input
+      class="form-item-listing"
+      type="text"
+      name="category"
+      placeholder="Category"
+      required
+    />
+  </div>
+  <div class="form-group-listing">
+    <input
+      class="form-item-listing"
+      type="url"
+      name="url"
+      placeholder="Image URL"
+      required
+    />
+  </div>
+  <div class="form-group-listing">
+    <input
+      class="form-item-listing"
+      type="number"
+      name="price"
+      step="0.10"
+      placeholder="Price $ "
+      required
+    />
+  </div>
+  <input class="btn btn-primary" type="submit" value="Save Listing" />
+</form>
+
+  {%endblock %}
+</form>
