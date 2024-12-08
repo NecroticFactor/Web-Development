@@ -87,10 +87,10 @@ def watchlist(request):
 @login_required
 def create_listing(request):
     if request.method == "POST":
-        title = request.POST.get('title')
-        description = request.POST.get('description')
-        category_name = request.POST.get('category')
-        url = request.POST.get('url')
+        title = request.POST.get('title').strip()  # Strip spaces from title
+        description = request.POST.get('description').strip()  # Strip spaces from description
+        category_name = request.POST.get('category').strip()  # Strip spaces from category name
+        url = request.POST.get('url').strip()  # Strip spaces from url
         
         try:
             price = Decimal(request.POST.get("price", "0.00"))
@@ -135,7 +135,7 @@ def update_listing(request, id):
     if request.method == "POST":
         title = request.POST.get('title')
         description = request.POST.get('description')
-        category_name = request.POST.get('category')  # This will be the category name as a string
+        category_name = request.POST.get('category').strip()
         url = request.POST.get('url')
 
         # Try to get the category, or create it if it doesn't exist
@@ -144,10 +144,10 @@ def update_listing(request, id):
         # Update the listing
         Listing.objects.filter(pk=id).update(
             user=request.user,
-            title=title,
-            description=description,
-            category=category,  # Pass the category instance here
-            url=url
+            title=title.strip(),
+            description=description.strip(),
+            category=category,  
+            url=url.strip()  
         )
 
         return HttpResponseRedirect(reverse("my_listings"))
@@ -186,13 +186,16 @@ def my_listings(request):
 
 @login_required
 def categories(request):
-    category = Listing.objects.get()
-    return render(request, "auctions/categories.html")
+    category = Category.objects.all()
+    context = {
+        "categories":category
+    }
+    return render(request, "auctions/categories.html", context)
 
 
 @login_required
 def category_listing(request, category):
-    listing = Listing.objects.get(pk=category)
+    listing = Listing.objects.filter(category__name=category)
     context = {
         "listings":listing
     }

@@ -1,5 +1,5 @@
 {% extends "auctions/layout.html" %} {% block title %} Category Listings
-{%endblock%} {%block body%} {% for listings in category_lisitng %}
+{%endblock%} {%block body%} {% for listing in listings %}
 <div class="listing-container">
   <div class="img-container">
     <img
@@ -21,4 +21,4 @@
     <h6>Created {{ listing.created_at|date:"F d, Y, h:i A" }}</h6>
   </div>
 </div>
-{% endblock %}
+{%endfor%} {% endblock %}
