@@ -135,17 +135,21 @@ def update_listing(request, id):
     if request.method == "POST":
         title = request.POST.get('title')
         description = request.POST.get('description')
-        category = request.POST.get('category')
+        category_name = request.POST.get('category')  # This will be the category name as a string
         url = request.POST.get('url')
 
-        # Create and save the listing with the created bid
+        # Try to get the category, or create it if it doesn't exist
+        category, created = Category.objects.get_or_create(name=category_name)
+
+        # Update the listing
         Listing.objects.filter(pk=id).update(
             user=request.user,
             title=title,
             description=description,
-            category=category,
+            category=category,  # Pass the category instance here
             url=url
         )
+
         return HttpResponseRedirect(reverse("my_listings"))
 
 @login_required
