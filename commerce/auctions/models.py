@@ -50,3 +50,13 @@ class Comment(models.Model):
         return f"User:{self.user} Comment:{self.comments} on {self.listing} at {self.created_at}"
 
 
+
+class Watchlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="watchlist")
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="watched_by")
+
+    class Meta:
+        unique_together = ('user', 'listing')  
+
+    def __str__(self):
+        return f"{self.user.username} - {self.listing.title}"

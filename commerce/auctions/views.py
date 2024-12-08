@@ -12,8 +12,19 @@ from .models import *
 
 def index(request):
     all_listings = Listing.objects.all().order_by("-created_at")
+    listings_with_max_bid = []
+
+    for listing in all_listings:
+        bids = listing.bids_on_listing.all()
+        if bids:
+            max_bid = max(bids, key=lambda bid: bid.bid)
+        else:
+            max_bid = None
+
+        listings_with_max_bid.append({"listing": listing, "max_bid": max_bid})
+
     context = {
-        "all_listings": all_listings
+        "listings_with_max_bid": listings_with_max_bid,
     }
 
     return render(request, "auctions/index.html", context)
@@ -200,3 +211,27 @@ def category_listing(request, category):
         "listings":listing
     }
     return render(request, "auctions/category_listing.html", context)
+
+
+@login_required
+def listing_detail(request, id):
+
+    listing = Listing.objects.get(pk=id) 
+    
+    # Fetch all bids for this listing
+    bids = listing.bids_on_listing.all()
+    max_bid = max(bids, key=lambda bid: bid.bid) if bids else None
+
+    is_owner = request.user == listing.user
+
+    context = {
+        "listing": listing,
+        "max_bid": max_bid,
+        "is_owner": is_owner,
+    }
+
+    return render(request, "auctions/listing_detail.html", context)
+
+@login_required
+def new_bid(request, id):
+    print("new bid placed")

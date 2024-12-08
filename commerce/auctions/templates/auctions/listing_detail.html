@@ -1,0 +1,47 @@
+{% extends "auctions/layout.html" %} {% block title %} Details {% endblock %}
+{%block body%}
+<div class="listing-container">
+  <div class="img-container">
+    <h3>Listing: {{ listing.title }}</h3>
+    <p>If Watchlist</p>
+    <img
+      src="{{ listing.url }}"
+      alt="{{ listing.title }}"
+      style="width: 300px; height: auto; border-radius: 10px"
+    />
+  </div>
+  <div class="listing-detail">
+    <p>Description: {{ listing.description }}</p>
+    {% if max_bid %}
+    <h4>Bid: ${{ max_bid.bid }}</h4>
+    {% else %}
+    <p>No bids yet.</p>
+    {% endif %}
+    {% if not is_owner %}
+    <p>()Bid(s) so far. Your bid is the current bid.</p>
+    <form method="POST" action="{% url "new_bid" id=listing.id %}">
+    {%csrf_token%}
+    <input
+      type="number"
+      id="number"
+      name="number"
+      placeholder="Bid"
+      required
+      style="width: 100%; box-sizing: border-box; padding: 10px"
+    />
+    <button
+      type="submit"
+      class="btn btn-primary"
+      style="margin-top: 10px; margin-bottom: 10px"
+    >
+      Place Bid
+    </button>
+    {% endif %}
+    <h4>Details</h4>
+    <ul>
+        <li>Listed by: {{listing.user}}</li>
+        <li>Category: <a href="{% url 'category_listing' category=listing.category %}">{{listing.category}}</a></li>
+        <li>Listed on: {{ listing.created_at|date:"F d, Y, h:i A" }}</li>
+  </div>
+</div>
+{%endblock%}

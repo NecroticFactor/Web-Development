@@ -14,7 +14,7 @@
     <h3>{{ item.listing.title }}</h3>
     <h6>Category: {{ item.listing.category }}</h6>
     <p>Description: {{ item.listing.description }}</p>
-    <h5>Price: {{item.listing.price }}</h5>
+    <h5>Price: ${{item.listing.price }}</h5>
     {% if item.max_bid %}
     <h4>Bid: ${{ item.max_bid.bid }}</h4>
     {% else %}

@@ -12,13 +12,14 @@
     <h3>{{ listing.title }}</h3>
     <h6>Category: {{ listing.category }}</h6>
     <p>Description: {{ listing.description }}</p>
-    <h5>Price: {{listing.price }}</h5>
+    <h5>Price: ${{listing.price }}</h5>
     {% if item.max_bid %}
     <h4>Bid: ${{ listing.max_bid.bid }}</h4>
     {% else %}
     <p>No bids yet.</p>
     {% endif %}
     <h6>Created {{ listing.created_at|date:"F d, Y, h:i A" }}</h6>
+    <a href="{% url 'listing_detail' id=listing.id %}">See More Details</a>
   </div>
 </div>
 {%endfor%} {% endblock %}
