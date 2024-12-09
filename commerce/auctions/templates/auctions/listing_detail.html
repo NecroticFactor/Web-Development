@@ -39,7 +39,15 @@
     {% endif %}
     <h4>Details</h4>
     <ul>
-        <li>Listed by: {{listing.user}}</li>
+        <li>
+          Listed by:
+          {% if is_owner%}
+          You
+          {% else %}
+          {{listing.user}}
+          {%endif%}
+      </li>
+
         <li>Category: <a href="{% url 'category_listing' category=listing.category %}">{{listing.category}}</a></li>
         <li>Listed on: {{ listing.created_at|date:"F d, Y, h:i A" }}</li>
   </div>

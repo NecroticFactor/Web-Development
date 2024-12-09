@@ -10,6 +10,7 @@ from django.urls import reverse
 from .models import *
 
 
+
 def index(request):
     all_listings = Listing.objects.all().order_by("-created_at")
     listings_with_max_bid = []
@@ -28,6 +29,8 @@ def index(request):
     }
 
     return render(request, "auctions/index.html", context)
+
+
 
 
 def login_view(request):
@@ -51,9 +54,13 @@ def login_view(request):
         return render(request, "auctions/login.html")
 
 
+
+
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
+
+
 
 
 def register(request):
@@ -90,18 +97,22 @@ def register(request):
         return render(request, "auctions/register.html")
 
 
+
+
 @login_required
 def watchlist(request):
     return render(request, "auctions/watchlist.html")
 
 
+
+
 @login_required
 def create_listing(request):
     if request.method == "POST":
-        title = request.POST.get('title').strip()  # Strip spaces from title
-        description = request.POST.get('description').strip()  # Strip spaces from description
-        category_name = request.POST.get('category').strip()  # Strip spaces from category name
-        url = request.POST.get('url').strip()  # Strip spaces from url
+        title = request.POST.get('title').strip()  
+        description = request.POST.get('description').strip()  
+        category_name = request.POST.get('category').strip()  
+        url = request.POST.get('url').strip() 
         
         try:
             price = Decimal(request.POST.get("price", "0.00"))
@@ -119,7 +130,7 @@ def create_listing(request):
                 description=description,
                 url=url,
                 price=price,
-                category=category,  # Link the listing to the category
+                category=category,  
             )
 
             success_message = "Item successfully added."
@@ -131,6 +142,7 @@ def create_listing(request):
     return render(request, "auctions/create_listing.html")
 
 
+
 @login_required
 def edit_listing(request, id):
     listing = Listing.objects.get(pk=id)
@@ -139,6 +151,7 @@ def edit_listing(request, id):
         "id":id,
     }
     return render(request, "auctions/edit_listing.html", context)
+
 
 
 @login_required
@@ -163,12 +176,13 @@ def update_listing(request, id):
 
         return HttpResponseRedirect(reverse("my_listings"))
 
+
+
 @login_required
 def delete_listing(rewuest, id):
     listing = get_object_or_404(Listing, pk=id)
     listing.delete()
     return redirect("my_listings")
-
 
 
 
@@ -195,6 +209,7 @@ def my_listings(request):
     return render(request, "auctions/my_listings.html", context)
 
 
+
 @login_required
 def categories(request):
     category = Category.objects.all()
@@ -202,6 +217,7 @@ def categories(request):
         "categories":category
     }
     return render(request, "auctions/categories.html", context)
+
 
 
 @login_required
@@ -213,11 +229,12 @@ def category_listing(request, category):
     return render(request, "auctions/category_listing.html", context)
 
 
+
 @login_required
 def listing_detail(request, id):
 
-    listing = Listing.objects.get(pk=id) 
-    
+    listing = Listing.objects.get(pk=id)
+
     # Fetch all bids for this listing
     bids = listing.bids_on_listing.all()
     max_bid = max(bids, key=lambda bid: bid.bid) if bids else None
@@ -231,6 +248,8 @@ def listing_detail(request, id):
     }
 
     return render(request, "auctions/listing_detail.html", context)
+
+
 
 @login_required
 def new_bid(request, id):
