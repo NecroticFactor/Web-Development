@@ -62,7 +62,7 @@ def logout_view(request):
 
 
 
-
+# User registration
 def register(request):
     if request.method == "POST":
         username = request.POST["username"]
@@ -98,14 +98,14 @@ def register(request):
 
 
 
-
+# Create watchlist
 @login_required
 def watchlist(request):
     return render(request, "auctions/watchlist.html")
 
 
 
-
+# Create user listing
 @login_required
 def create_listing(request):
     if request.method == "POST":
@@ -143,6 +143,7 @@ def create_listing(request):
 
 
 
+# Edit the listing
 @login_required
 def edit_listing(request, id):
     listing = Listing.objects.get(pk=id)
@@ -154,6 +155,8 @@ def edit_listing(request, id):
 
 
 
+
+# Update the listing after editing
 @login_required
 def update_listing(request, id):
     if request.method == "POST":
@@ -178,6 +181,7 @@ def update_listing(request, id):
 
 
 
+# Delete the listing
 @login_required
 def delete_listing(rewuest, id):
     listing = get_object_or_404(Listing, pk=id)
@@ -186,6 +190,7 @@ def delete_listing(rewuest, id):
 
 
 
+# Show the user's listing on my listing page
 @login_required
 def my_listings(request):
     current_user = request.user
@@ -210,6 +215,7 @@ def my_listings(request):
 
 
 
+# Get the category
 @login_required
 def categories(request):
     category = Category.objects.all()
@@ -220,37 +226,85 @@ def categories(request):
 
 
 
+# Get the listings based on category
 @login_required
 def category_listing(request, category):
-    listing = Listing.objects.filter(category__name=category)
+    listings = Listing.objects.filter(category__name=category)
+
+    listing_data = []
+    for listing in listings:
+        bids = listing.bids_on_listing.all()
+        max_bid = max(bids, key=lambda bid: bid.bid).bid if bids else None
+        listing_data.append({
+            "listing": listing,
+            "max_bid": max_bid
+        })
+
     context = {
-        "listings":listing
+        "listing_data": listing_data
     }
     return render(request, "auctions/category_listing.html", context)
 
 
 
-@login_required
-def listing_detail(request, id):
-
+# Get the contexts for the listing page and post-bid POST
+def get_listing_context(id, user):
     listing = Listing.objects.get(pk=id)
-
-    # Fetch all bids for this listing
     bids = listing.bids_on_listing.all()
-    max_bid = max(bids, key=lambda bid: bid.bid) if bids else None
+    max_bid_obj = max(bids, key=lambda bid: bid.bid) if bids else None
+    max_bid = max_bid_obj.bid if max_bid_obj else None
+    max_bid_user = max_bid_obj.user if max_bid_obj else None
+    is_owner = user == listing.user
 
-    is_owner = request.user == listing.user
-
-    context = {
+    return {
         "listing": listing,
         "max_bid": max_bid,
+        "max_bid_user": max_bid_user,
         "is_owner": is_owner,
     }
 
+
+
+# Get the details of a listing
+@login_required
+def listing_detail(request, id):
+    context = get_listing_context(id, request.user)
     return render(request, "auctions/listing_detail.html", context)
 
 
 
+# Handles Biding logic and redirection
 @login_required
 def new_bid(request, id):
-    print("new bid placed")
+    if request.method == "POST":
+        user_bid = float(request.POST.get("bid"))
+        listing = Listing.objects.get(pk=id)
+        bids = listing.bids_on_listing.all()
+
+        if not bids:
+            if user_bid > listing.price:
+                Bid.objects.create(
+                    bid=user_bid,
+                    user=request.user,
+                    listing=listing,
+                )
+                return redirect("listing_detail", id=id)
+            else:
+                context = get_listing_context(id, request.user)
+                context["bid_price_error"] = "Bid must be greater than the price."
+                return render(request, "auctions/listing_detail.html", context)
+        else:
+            max_bid = max(bids, key=lambda bid: bid.bid).bid
+            if user_bid > max_bid:
+                Bid.objects.create(
+                    listing=listing,
+                    bid=user_bid,
+                    user=request.user,
+                )
+                return redirect("listing_detail", id=id)
+            else:
+                context = get_listing_context(id, request.user)
+                context["bid_bid_error"] = "Bid must be greater than the current bid."
+                return render(request, "auctions/listing_detail.html", context)
+
+    return redirect("listing_detail", id=id)

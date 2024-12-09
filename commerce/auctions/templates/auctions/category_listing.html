@@ -1,25 +1,25 @@
 {% extends "auctions/layout.html" %} {% block title %} Category Listings
-{%endblock%} {%block body%} {% for listing in listings %}
+{%endblock%} {%block body%} {% for item in listing_data %}
 <div class="listing-container">
   <div class="img-container">
     <img
-      src="{{ listing.url }}"
-      alt="{{ listing.title }}"
+      src="{{ item.listing.url }}"
+      alt="{{ item.listing.title }}"
       style="width: 300px; height: auto; border-radius: 10px"
     />
   </div>
   <div class="listing-detail">
-    <h3>{{ listing.title }}</h3>
-    <h6>Category: {{ listing.category }}</h6>
-    <p>Description: {{ listing.description }}</p>
-    <h5>Price: ${{listing.price }}</h5>
+    <h3>{{ item.listing.title }}</h3>
+    <h6>Category: {{ item.listing.category }}</h6>
+    <p>Description: {{ item.listing.description }}</p>
+    <h5>Price: ${{item.listing.price }}</h5>
     {% if item.max_bid %}
-    <h4>Bid: ${{ listing.max_bid.bid }}</h4>
+    <h4>Bid: ${{ item.max_bid }}</h4>
     {% else %}
     <p>No bids yet.</p>
     {% endif %}
-    <h6>Created {{ listing.created_at|date:"F d, Y, h:i A" }}</h6>
-    <a href="{% url 'listing_detail' id=listing.id %}">See More Details</a>
+    <h6>Created {{ item.listing.created_at|date:"F d, Y, h:i A" }}</h6>
+    <a href="{% url 'listing_detail' id=item.listing.id %}">See More Details</a>
   </div>
 </div>
 {%endfor%} {% endblock %}

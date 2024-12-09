@@ -2,7 +2,11 @@
 {%block body%}
 <div class="listing-container">
   <div class="img-container">
-    <h3>Listing: {{ listing.title }}</h3>
+    <h3>
+      {%if success%}
+      <h4>{{success}}</h4>
+      {%endif%}
+      Listing: {{ listing.title }}</h3>
     <p>If Watchlist</p>
     <img
       src="{{ listing.url }}"
@@ -12,20 +16,29 @@
   </div>
   <div class="listing-detail">
     <p>Description: {{ listing.description }}</p>
-    {% if max_bid %}
-    <h4>Bid: ${{ max_bid.bid }}</h4>
+    <h5>Price: ${{listing.price }}</h5>
+    {% if max_bid is not None %}
+    <h5>Bid: ${{ max_bid }}</h5>
     {% else %}
     <p>No bids yet.</p>
     {% endif %}
+    {%if max_bid_user%}
+    <p>()Bid(s) so far. {{max_bid_user}}'s bid is the current bid.</p>
+    {%endif%}
     {% if not is_owner %}
-    <p>()Bid(s) so far. Your bid is the current bid.</p>
+    {%if bid_price_error or bid_bid_error %}
+    <h5>{{bid_price_error}}</h5>
+    <h5>{{bid_bid_error}}</h5>
+    {%endif%}
     <form method="POST" action="{% url "new_bid" id=listing.id %}">
     {%csrf_token%}
     <input
       type="number"
-      id="number"
-      name="number"
+      id="bid"
+      name="bid"
       placeholder="Bid"
+      step="0.01"
+      min="0"
       required
       style="width: 100%; box-sizing: border-box; padding: 10px"
     />
