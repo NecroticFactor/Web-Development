@@ -1,0 +1,20 @@
+{% extends "auctions/layout.html" %} {% block title %} 
+{%for listing in listings%} {{listing.user}}'s Listings {%endfor%} {% endblock %} {%block body%}
+{%for listing in listings%}
+<div class="listing-container">
+  <div class="img-container">
+    <img
+      src="{{ listing.url }}"
+      alt="{{ listing.title }}"
+      style="width: 300px; height: auto; border-radius: 10px"
+    />
+  </div>
+  <div class="listing-detail">
+    <h3>{{ listing.title }}</h3>
+    <h6>Category: {{ listing.category }}</h6>
+    <p>Description: {{ listing.description }}</p>
+    <h5>Price: ${{listing.price }}</h5>
+    <a href="{% url 'listing_detail' id=listing.id %}">See More Details</a>
+  </div>
+</div>
+{%endfor%} {%endblock%}

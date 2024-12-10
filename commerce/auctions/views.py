@@ -12,7 +12,7 @@ from .models import *
 
 
 def index(request):
-    all_listings = Listing.objects.all().order_by("-created_at")
+    all_listings = Listing.objects.filter(status="active").order_by("-created_at")
     listings_with_max_bid = []
 
     for listing in all_listings:
@@ -97,14 +97,6 @@ def register(request):
         return render(request, "auctions/register.html")
 
 
-
-# Create watchlist
-@login_required
-def watchlist(request):
-    return render(request, "auctions/watchlist.html")
-
-
-
 # Create user listing
 @login_required
 def create_listing(request):
@@ -154,8 +146,6 @@ def edit_listing(request, id):
     return render(request, "auctions/edit_listing.html", context)
 
 
-
-
 # Update the listing after editing
 @login_required
 def update_listing(request, id):
@@ -193,18 +183,16 @@ def delete_listing(rewuest, id):
 # Show the user's listing on my listing page
 @login_required
 def my_listings(request):
-    current_user = request.user
-    user_list = User.objects.get(username=current_user)
-    listings = user_list.user_listings.all()
+    current_user = request.user  
+    listings = current_user.user_listings.filter(status="active")  
 
     listings_with_max_bid = []
 
     for listing in listings:
-        bids = listing.bids_on_listing.all()
+        bids = listing.bids_on_listing.all()  
+        max_bid = None
         if bids:
-            max_bid = max(bids, key=lambda bid: bid.bid)
-        else:
-            max_bid = None
+            max_bid = max(bids, key=lambda bid: bid.bid) 
 
         listings_with_max_bid.append({"listing": listing, "max_bid": max_bid})
 
@@ -226,10 +214,11 @@ def categories(request):
 
 
 
+
 # Get the listings based on category
 @login_required
 def category_listing(request, category):
-    listings = Listing.objects.filter(category__name=category)
+    listings = Listing.objects.filter(category__name=category,status="active")
 
     listing_data = []
     for listing in listings:
@@ -247,20 +236,39 @@ def category_listing(request, category):
 
 
 
+# Get all listings by that user
+@login_required
+def user_listing(request, user):
+    user_obj = User.objects.get(username=user)
+
+    listings = Listing.objects.filter(user=user_obj, status="active")
+    context = {
+        "listings": listings
+    }
+    return render(request, "auctions/user_listing.html", context)
+
+
+
+
 # Get the contexts for the listing page and post-bid POST
 def get_listing_context(id, user):
     listing = Listing.objects.get(pk=id)
     bids = listing.bids_on_listing.all()
+    bids_count = bids.count()
     max_bid_obj = max(bids, key=lambda bid: bid.bid) if bids else None
     max_bid = max_bid_obj.bid if max_bid_obj else None
     max_bid_user = max_bid_obj.user if max_bid_obj else None
     is_owner = user == listing.user
+
+    in_watchlist = Watchlist.objects.filter(user=user, listing=listing).exists()
 
     return {
         "listing": listing,
         "max_bid": max_bid,
         "max_bid_user": max_bid_user,
         "is_owner": is_owner,
+        "bids_count":bids_count,
+        "in_watchlist":in_watchlist
     }
 
 
@@ -308,3 +316,42 @@ def new_bid(request, id):
                 return render(request, "auctions/listing_detail.html", context)
 
     return redirect("listing_detail", id=id)
+
+
+
+# Create watchlist
+@login_required
+def watchlist(request):
+    if request.method == "POST":
+        listing_id = request.POST.get("listing_id")
+        listing = Listing.objects.get(id=listing_id)
+
+        if not Watchlist.objects.filter(user=request.user, listing=listing).exists():
+            Watchlist.objects.create(
+                user=request.user,
+                listing=listing
+            )
+        return redirect('watchlist')
+
+    else:
+        watchlist_listing = Watchlist.objects.filter(user=request.user)
+        listings = []
+        for entry in watchlist_listing:
+            listings.append(entry.listing)
+
+
+        context = {
+            "listings": listings,
+        }
+        return render(request, "auctions/watchlist.html", context)
+
+
+# Delete watchlist listings
+@login_required
+def delete_watchlist(request, id):
+    listing_id = request.POST.get("listing_id")
+    listing = Listing.objects.get(id=listing_id)
+
+    # Delete the specific Watchlist entry
+    Watchlist.objects.filter(user=request.user, listing=listing).delete()
+    return redirect('watchlist')

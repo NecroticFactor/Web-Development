@@ -22,6 +22,7 @@
     {% endif %}
     <h6>Created {{ item.listing.created_at|date:"F d, Y, h:i A" }}</h6>
     <a href="{% url 'edit_listing' id=item.listing.id %}">Edit listing</a>
+    <p>Close Listing</p>
   </div>
 </div>
 {% endfor %} {% endblock %}

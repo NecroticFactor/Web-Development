@@ -1,4 +1,12 @@
 {% extends "auctions/layout.html" %} {% block title%} Watchlist {%endblock%}
 {%block body %}
 <h2>Watchlist</h2>
-Create your watchlist {%endblock%}
+{% for listing in listings %}
+<ul>
+  <li>
+    <a href="{% url 'listing_detail' id=listing.id %}"
+      >{{listing.title}} by {{listing.user}}</a
+    >
+  </li>
+</ul>
+{%endfor%} {%endblock%}

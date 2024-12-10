@@ -7,7 +7,29 @@
       <h4>{{success}}</h4>
       {%endif%}
       Listing: {{ listing.title }}</h3>
-    <p>If Watchlist</p>
+  {%if not in_watchlist %}
+    <form method="POST" action="{% url 'watchlist'%}">
+      {% csrf_token %}
+      <input type="hidden" name="listing_id" value="{{ listing.id }}">
+      <button
+      type="submit"
+      class="btn btn-primary"
+      style="margin-top: 10px; margin-bottom: 10px"
+      >Add to Watchlist
+    </button>
+  </form>
+{%else%}
+  <form method="POST" action="{% url 'delete_watchlist' id=listing.id %}">
+    {% csrf_token %}
+    <input type="hidden" name="listing_id" value="{{ listing.id }}">
+    <button
+    type="submit"
+    class="btn btn-primary"
+    style="margin-top: 10px; margin-bottom: 10px"
+    >Remove from Watchlist
+  </button>
+</form>
+{%endif%}
     <img
       src="{{ listing.url }}"
       alt="{{ listing.title }}"
@@ -23,7 +45,7 @@
     <p>No bids yet.</p>
     {% endif %}
     {%if max_bid_user%}
-    <p>()Bid(s) so far. {{max_bid_user}}'s bid is the current bid.</p>
+    <p>{{bids_count}} Bid(s) so far. {{max_bid_user}}'s bid is the current bid.</p>
     {%endif%}
     {% if not is_owner %}
     {%if bid_price_error or bid_bid_error %}
@@ -57,7 +79,7 @@
           {% if is_owner%}
           You
           {% else %}
-          {{listing.user}}
+          <a href="{% url 'user_listing' user=listing.user %}">{{listing.user}}</a>
           {%endif%}
       </li>
 
