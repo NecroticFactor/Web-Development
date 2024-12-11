@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
 from decimal import Decimal, InvalidOperation
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -15,14 +16,16 @@ def index(request):
     all_listings = Listing.objects.filter(status="active").order_by("-created_at")
     listings_with_max_bid = []
 
+
     for listing in all_listings:
         bids = listing.bids_on_listing.all()
+
         if bids:
             max_bid = max(bids, key=lambda bid: bid.bid)
         else:
             max_bid = None
 
-        listings_with_max_bid.append({"listing": listing, "max_bid": max_bid})
+        listings_with_max_bid.append({"listing": listing, "max_bid": max_bid,})
 
     context = {
         "listings_with_max_bid": listings_with_max_bid,
@@ -355,3 +358,36 @@ def delete_watchlist(request, id):
     # Delete the specific Watchlist entry
     Watchlist.objects.filter(user=request.user, listing=listing).delete()
     return redirect('watchlist')
+
+
+@login_required
+def closed_listing(request):
+    if request.method == "POST":
+        id = request.POST.get('close_id')
+        listing = Listing.objects.get(id=id)
+        listing.status = "closed"
+        listing.save()
+
+        return redirect('closed_listing')
+    else:
+        closed_listings = Listing.objects.filter(status="closed")
+
+        closed_listings_data = []
+        for listing in closed_listings:
+            bids = listing.bids_on_listing.all()
+            max_bid_obj = max(bids, key=lambda bid: bid.bid) if bids else None
+            max_bid = max_bid_obj.bid if max_bid_obj else None
+            max_bid_user = max_bid_obj.user if max_bid_obj else None
+            is_winner = request.user == max_bid_user
+
+            closed_listings_data.append({
+                "listing": listing,
+                "max_bid": max_bid,
+                "max_bid_user": max_bid_user,
+                "is_winner": is_winner,
+            })
+
+        context = {
+            "closed_listings_data": closed_listings_data,
+        }
+        return render(request, "auctions/closed_listings.html", context)

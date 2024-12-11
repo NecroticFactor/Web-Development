@@ -14,15 +14,26 @@
     <h3>{{ item.listing.title }}</h3>
     <h6>Category: {{ item.listing.category }}</h6>
     <p>Description: {{ item.listing.description }}</p>
+    <a href="{% url 'edit_listing' id=item.listing.id %}">Edit listing</a>
+    <br></br>
     <h5>Price: ${{item.listing.price }}</h5>
     {% if item.max_bid %}
-    <h4>Bid: ${{ item.max_bid.bid }}</h4>
+    <h5>Bid: ${{ item.max_bid.bid }}</h5>
     {% else %}
     <p>No bids yet.</p>
     {% endif %}
     <h6>Created {{ item.listing.created_at|date:"F d, Y, h:i A" }}</h6>
-    <a href="{% url 'edit_listing' id=item.listing.id %}">Edit listing</a>
-    <p>Close Listing</p>
+    <form method="POST" action="{% url 'closed_listing' %}">
+      {%csrf_token%}
+      <input type="hidden" name="close_id" value="{{item.listing.id}}" />
+      <button
+        type="submit"
+        class="btn btn-primary"
+        style="margin-top: 10px; margin-bottom: 10px"
+      >
+        Close Auction
+      </button>
+    </form>
   </div>
 </div>
 {% endfor %} {% endblock %}

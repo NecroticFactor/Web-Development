@@ -1,0 +1,25 @@
+{% extends "auctions/layout.html" %} {% block title %} Closed Auctions
+{%endblock %} 
+{% block body %} 
+<h2>Closed Auctions</h2>
+
+  {%if closed_listings_data%}
+    {% for item in closed_listings_data %}
+    <h3>{{ item.listing.title }}</h3>
+
+    {% if item.is_winner %}
+    <div class="alert alert-success" role="alert">
+      Congratulations! You won the auction for "{{ item.listing.title }}"!
+    </div>
+    {% endif %}
+
+    <h6>Category: {{ item.listing.category }}</h6>
+    <p>Description: {{ item.listing.description }}</p>
+    <h5>Price: ${{ item.listing.price }}</h5>
+    <h5>Bid: ${{ item.max_bid }}</h5>
+    <br></br>
+    {% endfor %} 
+{%else%}
+    <p>You have not closed an auction yet!</p>
+{%endif%}
+{% endblock %}
