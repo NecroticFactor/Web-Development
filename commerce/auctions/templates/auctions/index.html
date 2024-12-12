@@ -13,7 +13,7 @@
   </div>
   <div class="listing-detail">
     <h3>{{ item.listing.title }}</h3>
-    <h6>Category: {{ item.listing.category }}</h6>
+    <h6>Category: <a href="{% url 'category_listing' category=item.listing.category %}">{{item.listing.category}}</a></li></h6>
     <p>Description: {{ item.listing.description }}</p>
     <h5>Price: ${{item.listing.price }}</h5>
     {% if item.max_bid %}

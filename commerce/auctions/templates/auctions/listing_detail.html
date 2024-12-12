@@ -62,15 +62,16 @@
       step="0.01"
       min="0"
       required
-      style="width: 100%; box-sizing: border-box; padding: 10px"
+      style="width: 100%; box-sizing: border-box; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"
     />
     <button
       type="submit"
       class="btn btn-primary"
-      style="margin-top: 10px; margin-bottom: 10px"
+      style="margin-top: 10px; margin-bottom: 10px; "
     >
       Place Bid
     </button>
+  </form>
     {% endif %}
     <h4>Details</h4>
     <ul>
@@ -101,5 +102,42 @@
     </form>
   </div>
   {%endif%}
+
+  {%if not is_owner%}
+  <div>
+    <form method="POST" action="{% url 'listing_detail' id=listing.id %}">
+      <div>
+      {%csrf_token%}
+      <textarea
+                name="comment"
+                placeholder="Add your comments here..."
+                maxlength="500"
+                rows="3"
+                style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;"
+            ></textarea>
+    </div>
+    <div>
+      <button
+      type="submit"
+      class="btn btn-primary"
+        style="margin-top: 10px; margin-bottom: 10px"
+      >Post Comment
+    </div>
+    </form>
+  </div>
+  {%endif%}
+  <div>
+  <h3>Comments</h3>
+  <div>
+    {%if comments%}
+  {%for comment in comments%}
+  <h7>{{comment}}</h7>
+  <p>By {{comment.user}} at {{comment.created_at}}</p>
+    {%endfor%}
+  {%else%}
+  <h6>No comments yet</h6>
+  {%endif%}
+  </div>
+  </div>
 </div>
 {%endblock%}

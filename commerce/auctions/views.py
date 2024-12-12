@@ -262,8 +262,8 @@ def get_listing_context(id, user):
     max_bid = max_bid_obj.bid if max_bid_obj else None
     max_bid_user = max_bid_obj.user if max_bid_obj else None
     is_owner = user == listing.user
-
     in_watchlist = Watchlist.objects.filter(user=user, listing=listing).exists()
+    comments = listing.listing_comments.order_by('-created_at')
 
     return {
         "listing": listing,
@@ -271,7 +271,8 @@ def get_listing_context(id, user):
         "max_bid_user": max_bid_user,
         "is_owner": is_owner,
         "bids_count":bids_count,
-        "in_watchlist":in_watchlist
+        "in_watchlist":in_watchlist,
+        "comments":comments,
     }
 
 
@@ -279,6 +280,17 @@ def get_listing_context(id, user):
 # Get the details of a listing
 @login_required
 def listing_detail(request, id):
+    if request.method == "POST":
+        comment = request.POST.get('comment')
+        listing = Listing.objects.get(id=id)
+        if comment and comment.strip():
+            Comment.objects.create(
+                comments=comment,
+                user=request.user,
+                listing=listing,
+            )
+        return redirect('listing_detail', id=id)
+
     context = get_listing_context(id, request.user)
     return render(request, "auctions/listing_detail.html", context)
 

@@ -11,6 +11,9 @@ class User(AbstractUser):
 class Category(models.Model):
     name = models.CharField(max_length=20, unique=True)
 
+    class Meta:
+        verbose_name_plural = "Categories"
+
     def __str__(self):
         return self.name
 
@@ -48,8 +51,20 @@ class Comment(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="listing_comments")
 
     def __str__(self):
-        return f"User:{self.user} Comment:{self.comments} on {self.listing} at {self.created_at}"
+        return self.comments
 
+
+class Replies(models.Model):
+    reply = models.CharField(max_length=500, blank=True)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name="replies")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_replies")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "Replies"
+
+    def __str__(self):
+        return self.reply
 
 
 class Watchlist(models.Model):

@@ -1,5 +1,7 @@
 {% extends "auctions/layout.html" %} {% block title %} Category Listings
-{%endblock%} {%block body%} {% for item in listing_data %}
+{%endblock%} {%block body%}
+<h1>{{listing_data.0.listing.category}}</h1>
+{%for item in listing_data%}
 <div class="listing-container">
   <div class="img-container">
     <img
@@ -20,6 +22,7 @@
     {% endif %}
     <h6>Created {{ item.listing.created_at|date:"F d, Y, h:i A" }}</h6>
     <a href="{% url 'listing_detail' id=item.listing.id %}">See More Details</a>
+    <br></br>
   </div>
 </div>
 {%endfor%} {% endblock %}
