@@ -7,19 +7,19 @@ Welcome to the repository for all the projects completed as part of the **CS50W:
 
 The course covers various web development concepts, such as HTML, CSS, JavaScript, Django, SQL, and more. Below is a brief summary of the projects in this repository:
 
-1. **Project 0: Search**  
+1. **Project 0: Search / Google Search**  
    Replicating Google's Advanced Search page using HTML and CSS.
    
 2. **Project 1: Wiki**  
    Building a Wikipedia-like website using Django.
    
-3. **Project 2: Commerce**  
+3. **Project 2: Commerce / Auction Site**  
    Creating an e-commerce auction site where users can list, bid, and comment on items.
    
-4. **Project 3: Mail**  
+4. **Project 3: Mail / Email**  
    Developing a front-end for an email client using JavaScript to send and receive emails.
    
-5. **Project 4: Network**  
+5. **Project 4: Network / Social Network**  
    Implementing a social media platform where users can post and follow others.
    
 6. **Project 5: Capstone**  
