@@ -8,6 +8,9 @@ class User(AbstractUser):
         max_length=10, choices=ACCOUNT_TYPE_CHOICES, default="private"
     )
 
+    def __str__(self):
+        return self.username
+
 
 class Post(models.Model):
     title = models.CharField(max_length=50)
@@ -30,6 +33,7 @@ class Likes(models.Model):
 
     class Meta:
         unique_together = ("user", "post")
+        verbose_name_plural = "Likes"
 
     def __str__(self):
         return f"{self.user.username} liked {self.post.title}"
@@ -46,8 +50,11 @@ class Comments(models.Model):
     comments = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name_plural = "Comments"
+
     def __str__(self):
-        return self.comments
+        return f"{self.comments} by {self.user.username}"
 
 
 class Replies(models.Model):
@@ -62,6 +69,12 @@ class Replies(models.Model):
     )
     replies = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "Replies"
+
+    def __str__(self):
+        return f"{self.replies} by {self.user.username}"
 
 
 class Follow(models.Model):
