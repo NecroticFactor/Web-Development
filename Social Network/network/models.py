@@ -3,7 +3,10 @@ from django.db import models
 
 
 class User(AbstractUser):
-    pass
+    ACCOUNT_TYPE_CHOICES = [("public", "Public"), ("private", "Private")]
+    account_type = models.CharField(
+        max_length=10, choices=ACCOUNT_TYPE_CHOICES, default="private"
+    )
 
 
 class Post(models.Model):
@@ -21,12 +24,8 @@ class Post(models.Model):
 
 
 class Likes(models.Model):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="likes_by_user"
-    )
-    post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, related_name="likes_on_post"
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="liked_user")
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="liked_posts")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -38,10 +37,10 @@ class Likes(models.Model):
 
 class Comments(models.Model):
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="comments_by_user"
+        User, on_delete=models.CASCADE, related_name="commented_user"
     )
     post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, related_name="comments_on_post"
+        Post, on_delete=models.CASCADE, related_name="commented_post"
     )
     total_replies = models.IntegerField(default=0)
     comments = models.CharField(max_length=100)
@@ -53,13 +52,13 @@ class Comments(models.Model):
 
 class Replies(models.Model):
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="replies_by_user"
+        User, on_delete=models.CASCADE, related_name="replied_user"
     )
     post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, related_name="replies_on_post"
+        Post, on_delete=models.CASCADE, related_name="replied_post"
     )
     comments = models.ForeignKey(
-        Comments, on_delete=models.CASCADE, related_name="replies_on_comment"
+        Comments, on_delete=models.CASCADE, related_name="replied_comment"
     )
     replies = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -72,10 +71,18 @@ class Follow(models.Model):
     followed = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="followers"
     )
+
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("accepted", "Accepted"),
+        ("rejected", "Rejected"),
+        ("blocked", "Blocked"),
+    ]
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ("follower", "followed")
 
     def __str__(self):
-        return f"{self.follower.username} follows {self.followed.username}"
+        return f"{self.follower.username} -> {self.followed.username} ({self.status})"
