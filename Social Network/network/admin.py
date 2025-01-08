@@ -100,11 +100,11 @@ class CommentsAdmin(admin.ModelAdmin):
 
 
 class RepliesAdmin(admin.ModelAdmin):
-    readonly_fields = ("user", "post", "comments", "created_at")
+    readonly_fields = ("user", "comments", "created_at")
     list_per_page = 20
     list_filter = ["created_at"]
     fieldsets = (
-        (None, {"fields": ("user", "post", "comments")}),
+        (None, {"fields": ("user", "comments")}),
         ("Date Information", {"fields": ("created_at",), "classes": ("collapse",)}),
     )
 

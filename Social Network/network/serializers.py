@@ -9,13 +9,15 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
-    post_username = serializers.CharField(source="user.username")
+    username = serializers.CharField(source="user.username", read_only=True)
+    total_likes = serializers.IntegerField(read_only=True)
+    total_comments = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Post
         fields = [
             "id",
-            "post_username",
+            "username",
             "title",
             "body",
             "total_likes",
@@ -25,23 +27,33 @@ class PostSerializer(serializers.ModelSerializer):
 
 
 class LikesSerializer(serializers.ModelSerializer):
-    likes_username = serializers.CharField(source="user.username")
-    likes_post_title = serializers.CharField(source="post.title")
+    username = serializers.CharField(source="user.username", read_only=True)
+    post = serializers.CharField(source="post.title", read_only=True)
+    post_id = serializers.CharField(source="post.id", read_only=True)
 
     class Meta:
         model = Likes
-        fields = ["likes_username", "likes_post_title"]
+        fields = [
+            "id",
+            "username",
+            "post",
+            "post_id",
+        ]
 
 
 class CommentsSerializer(serializers.ModelSerializer):
-    comments_username = serializers.CharField(source="user.username")
-    comments_post_title = serializers.CharField(source="post.title")
+    username = serializers.CharField(source="user.username", read_only=True)
+    post_title = serializers.CharField(source="post.title", read_only=True)
+    post_id = serializers.CharField(source="post.id", read_only=True)
+    total_replies = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Comments
         fields = [
-            "comments_username",
-            "comments_post_title",
+            "id",
+            "username",
+            "post_title",
+            "post_id",
             "comments",
             "total_replies",
             "created_at",
@@ -49,31 +61,26 @@ class CommentsSerializer(serializers.ModelSerializer):
 
 
 class RepliesSerializer(serializers.ModelSerializer):
-    replied_username = serializers.CharField(source="user.username")
-    replied_post_title = serializers.CharField(source="post.title")
-    replied_comments = serializers.CharField(source="comments.comments")
+    username = serializers.CharField(source="user.username", read_only=True)
+    comment = serializers.CharField(source="comments.comments", read_only=True)
+    comment_id = serializers.CharField(source="comments.id", read_only=True)
 
     class Meta:
         model = Replies
         fields = [
-            "replied_username",
-            "replied_post_title",
-            "replied_comments",
-            "replied",
+            "id",
+            "username",
+            "comment",
+            "comment_id",
+            "replies",
             "created_at",
         ]
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    follower_username = serializers.SerializerMethodField()
-    followed_username = serializers.SerializerMethodField()
+    follower = serializers.CharField(source="follower.username", read_only=True)
+    followed = serializers.CharField(source="followed.username", read_only=True)
 
     class Meta:
         model = Follow
-        fields = ["follower_username", "followed_username", "status", "created_at"]
-
-    def get_follower_username(self, obj):
-        return obj.follower.username
-
-    def get_followed_username(self, obj):
-        return obj.followed.username
+        fields = ["follower", "followed", "status", "created_at"]

@@ -8,6 +8,10 @@ class User(AbstractUser):
         max_length=10, choices=ACCOUNT_TYPE_CHOICES, default="private"
     )
 
+    total_followers = models.PositiveIntegerField(default=0)
+    total_following = models.PositiveIntegerField(default=0)
+    total_posts = models.PositiveIntegerField(default=0)
+
     def __str__(self):
         return self.username
 
@@ -60,9 +64,6 @@ class Comments(models.Model):
 class Replies(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="replied_user"
-    )
-    post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, related_name="replied_post"
     )
     comments = models.ForeignKey(
         Comments, on_delete=models.CASCADE, related_name="replied_comment"
