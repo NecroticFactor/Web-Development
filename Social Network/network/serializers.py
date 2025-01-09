@@ -5,7 +5,15 @@ from .models import *
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username", "account_type", "first_name", "last_name"]
+        fields = [
+            "id",
+            "username",
+            "account_type",
+            "first_name",
+            "last_name",
+            "total_followers",
+            "total_following",
+        ]
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -108,4 +116,4 @@ class FollowCreateSerializer(serializers.ModelSerializer):
 
 
 class FollowUpdateSerializer(serializers.Serializer):
-    status = serializers.ChoiceField(choices=["approve", "reject"])
+    status = serializers.ChoiceField(choices=["approve", "reject", "unfollow"])

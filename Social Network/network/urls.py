@@ -13,6 +13,12 @@ auth_patterns = [
 
 page_patterns = [
     path("", views.index, name="index"),
+    path(
+        "profile/<str:username>", views.ProfileViewPage.as_view(), name="profile-page"
+    ),
+]
+
+single_query_patterns = [
     path("liked-posts/", views.LikedPostsView.as_view(), name="liked-posts"),
     path(
         "commented-posts/", views.CommentedPostsView.as_view(), name="commented-posts"
@@ -20,6 +26,8 @@ page_patterns = [
     path(
         "following-posts/", views.FollowingPostsView.as_view(), name="following-posts"
     ),
+    path("following/", views.FollowingUserView.as_view(), name="following"),
+    path("followers/", views.FollowerUserView.as_view(), name="followers"),
 ]
 
 router = DefaultRouter()
@@ -44,6 +52,7 @@ follow_router.register(r"follow", views.FollowViewSet, basename="follow")
 urlpatterns = (
     auth_patterns
     + page_patterns
+    + single_query_patterns
     + router.urls
     + post_router.urls
     + comments_router.urls

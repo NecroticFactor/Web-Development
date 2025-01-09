@@ -81,6 +81,7 @@ class UpdateUserView(APIView):
         user = request.user
         data = request.data
 
+        # Validate account type
         username = data.get("username", user.username)
         account_type = data.get("account_type", user.account_type)
 
@@ -92,6 +93,7 @@ class UpdateUserView(APIView):
                 }
             )
 
+        # Check if no changes were made
         if username == user.username and account_type == user.account_type:
             return Response(
                 {"detail": "No changes detected."},
@@ -113,7 +115,7 @@ class UpdateUserView(APIView):
         )
 
 
-# # ----------------------------VIEWS FOR API QUERIES------------------------------------# #
+# ----------------------------VIEWS FOR API QUERIES------------------------------------#
 
 
 # Handles Post CRUD
@@ -123,15 +125,18 @@ class PostViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
+        # Ensure user is authenticated before creating a post
         if not self.request.user.is_authenticated:
             raise PermissionDenied("You must be logged in to create a post.")
 
+        # Save post and increment total posts for the user
         with transaction.atomic():
             serializer.save(user=self.request.user)
             self.request.user.total_posts += 1
             self.request.user.save()
 
     def create(self, request, *args, **kwargs):
+        # Check if user is authenticated before creating a post
         if not request.user.is_authenticated:
             return Response(
                 {"detail": "Authentication credentials were not provided."},
@@ -140,6 +145,7 @@ class PostViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
+        # Delete a post and decrement total posts for the user
         post_id = self.kwargs["pk"]
         try:
             post = Post.objects.get(id=post_id, user=request.user)
@@ -160,6 +166,38 @@ class PostViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_204_NO_CONTENT,
             )
 
+    def list(self, request, *args, **kwargs):
+        # Fetch posts based on query parameters
+        user_id = request.query_params.get("user_id")
+
+        if user_id:
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                return Response(
+                    {"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Check if the user is private and if the requesting user is not allowed to view their posts
+            if user.account_type == "private" and user != request.user:
+                is_following = Follow.objects.filter(
+                    follower=request.user, followed=user, status="accepted"
+                ).exists()
+                if not is_following:
+                    return Response(
+                        {"detail": "This user's account is private."},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+
+            # Fetch posts for the specific user
+            queryset = Post.objects.filter(user=user)
+        else:
+            # Fetch all posts
+            queryset = Post.objects.all()
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 # Handles Comments CRUD, Increment, Decrement
 class CommentViewSet(viewsets.ModelViewSet):
@@ -168,10 +206,12 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
+        # Return comments for a specific post
         post_id = self.kwargs["post_pk"]
         return Comments.objects.filter(post=post_id).select_related("post", "user")
 
     def perform_create(self, serializer):
+        # Save comment and increment total comments for the post
         post_id = self.kwargs["post_pk"]
 
         try:
@@ -186,6 +226,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             post.save()
 
     def destroy(self, request, *args, **kwargs):
+        # Delete a comment and decrement total comments for the post
         post_id = self.kwargs["post_pk"]
         comment_id = self.kwargs["comment_id"]
 
@@ -214,10 +255,12 @@ class LikeViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
+        # Return likes for a specific post
         post_id = self.kwargs["post_pk"]
         return Likes.objects.filter(post_id=post_id).select_related("post", "user")
 
     def perform_create(self, serializer):
+        # Like a post and increment total likes for the post
         post_id = self.kwargs["post_pk"]
 
         try:
@@ -234,6 +277,7 @@ class LikeViewSet(viewsets.ModelViewSet):
             post.save()
 
     def destroy(self, request, *args, **kwargs):
+        # Remove like from post and decrement total likes for the post
         post_id = self.kwargs["post_pk"]
 
         try:
@@ -262,12 +306,14 @@ class ReplyViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
+        # Return replies for a specific comment
         comment_id = self.kwargs["comment_pk"]
         return Replies.objects.filter(comments=comment_id).select_related(
             "comments", "user"
         )
 
     def perform_create(self, serializer):
+        # Save reply and increment total replies for the comment
         comment_id = self.kwargs["comment_pk"]
         try:
             comment = Comments.objects.get(id=comment_id)
@@ -281,6 +327,7 @@ class ReplyViewSet(viewsets.ModelViewSet):
             comment.save()
 
     def destroy(self, request, *args, **kwargs):
+        # Delete a reply and decrement total replies for the comment
         comment_id = self.kwargs["comment_pk"]
         reply_id = self.kwargs["reply_id"]
 
@@ -307,6 +354,7 @@ class FollowViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
+        # Return different serializers based on action
         if self.action == "create":
             return FollowCreateSerializer
         elif self.action in ["update", "partial_update"]:
@@ -314,12 +362,13 @@ class FollowViewSet(viewsets.ModelViewSet):
         return FollowSerializer
 
     def list(self, request, *args, **kwargs):
-        status_filter = request.query_params.get("status", "pending")
-        requests = Follow.objects.filter(followed=request.user, status=status_filter)
+        # Return pending follow requests for the authenticated user
+        requests = Follow.objects.filter(followed=request.user, status="pending")
         serializer = FollowSerializer(requests, many=True)
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
+        # Create a follow request
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         followed_id = serializer.validated_data["followed_id"]
@@ -333,9 +382,19 @@ class FollowViewSet(viewsets.ModelViewSet):
         )
 
         if created:
-            follow.status = "pending"
+            if followed.account_type == "public":
+                follow.status = "accepted"
+            else:
+                follow.status = "pending"
             follow.save()
-            return Response({"success": "Follow request sent."}, status=201)
+            return Response(
+                (
+                    {"success": "Followed User."}
+                    if followed.account_type == "public"
+                    else {"success": "Follow request sent."}
+                ),
+                status=201,
+            )
         elif follow.status == "pending":
             return Response({"info": "Follow request already sent."}, status=200)
         else:
@@ -344,66 +403,138 @@ class FollowViewSet(viewsets.ModelViewSet):
             )
 
     def update(self, request, pk=None, *args, **kwargs):
-        follow = get_object_or_404(
-            Follow, id=pk, followed=request.user, status="pending"
-        )
+        # Handle follow actions (approve, unfollow, reject)
+        follow = get_object_or_404(Follow, id=pk, followed=request.user)
+
+        followed_user = follow.follower
+        user = request.user
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         action = serializer.validated_data["status"]
 
-        if action == "approve":
+        if action == "approve" and follow.status == "pending":
             follow.status = "accepted"
-            follow.save()
+
+            with transaction.atomic():
+                follow.save()
+                user.total_followers += 1
+                followed_user.total_following += 1
+                user.save()
+                followed_user.save()
+
             return Response({"success": "Follow request approved."}, status=200)
 
-        elif action == "reject":
-            follow.status = "rejected"
-            follow.save()
+        elif action == "unfollow" and follow.status == "accepted":
+            if request.user == user:
+                with transaction.atomic():
+                    follow.delete()
+                    user.total_following -= 1
+                    followed_user.total_followers -= 1
+                    user.save()
+                    followed_user.save()
+
+            return Response({"success": "Unfollowed User."}, status=200)
+
+        elif action == "reject" and follow.status == "pending":
+            follow.delete()
             return Response({"success": "Follow request rejected."}, status=200)
 
-        return Response({"error": "Invalid action."}, status=400)
-
-    def partial_update(self, request, pk=None, *args, **kwargs):
-        return self.update(request, pk, *args, **kwargs)
+        else:
+            return Response({"info": "Action already performed."}, status=200)
 
 
 # # ----------------------SPECIAL VIEWS FOR SPECIAL QUERIES---------------------------------# #
 
 
+# View for profile page
+class ProfileViewPage(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        username = kwargs.get("username")
+        print(username)
+
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        self_user = self.request.user  # The currently logged-in user
+
+        if username == self_user.username:
+            # Display logged-in user details
+            serializer = UserSerializer(self_user)
+        else:
+            # Get details for the user specified by the 'username'
+            serializer = UserSerializer(user)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# View for fetching posts liked by the user
 class LikedPostsView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
         user = request.user
         liked_posts = Post.objects.filter(liked_posts__user=user)
-
-        # Serialize and return the posts
         serializer = PostSerializer(liked_posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+# View for fetching posts commented on by the user
 class CommentedPostsView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
         user = request.user
         commented_posts = Post.objects.filter(commented_post__user=user)
-
         serializer = PostSerializer(commented_posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+# View for fetching posts from users the user is following
 class FollowingPostsView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
         user = request.user
-
         following_users = Follow.objects.filter(
             follower=user, status="accepted"
         ).values_list("followed", flat=True)
         posts_by_following = Post.objects.filter(user__id__in=following_users)
         serializer = PostSerializer(posts_by_following, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+# View for fetching users the user is following
+class FollowingUserView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+        # Fetch users the current user is following with 'accepted' status
+        following_users = User.objects.filter(
+            id__in=Follow.objects.filter(follower=user, status="accepted").values(
+                "followed"
+            )
+        )
+        serializer = UserSerializer(following_users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# View for fetching where the user is the user being followed
+class FollowerUserView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+        followed_users = User.objects.filter(
+            followers__followed=user, followers__status="accepted"
+        )
+        serializer = UserSerializer(followed_users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
