@@ -8,8 +8,11 @@ class UserAdmin(admin.ModelAdmin):
         "username",
         "first_name",
         "last_name",
-        "account_type",
         "email",
+        "account_type",
+        "total_posts",
+        "total_following",
+        "total_followers",
         "date_joined",
     )
 
