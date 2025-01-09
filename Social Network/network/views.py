@@ -75,7 +75,7 @@ def register(request):
 
 # Update User Profile
 class UpdateUserView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def put(self, request, *args, **kwargs):
         user = request.user
@@ -122,7 +122,7 @@ class UpdateUserView(APIView):
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         # Ensure user is authenticated before creating a post
@@ -153,9 +153,8 @@ class PostViewSet(viewsets.ModelViewSet):
             raise NotFound("Post does not exist")
 
         with transaction.atomic():
-            if self.request.user.total_posts > 0:
-                self.request.user.total_posts -= 1
-                self.request.user.save()
+            self.request.user.total_posts = max(0, self.request.user.total_posts - 1)
+            self.request.user.save()
             response = super().destroy(request, *args, **kwargs)
 
             return Response(
@@ -190,10 +189,12 @@ class PostViewSet(viewsets.ModelViewSet):
                     )
 
             # Fetch posts for the specific user
-            queryset = Post.objects.filter(user=user)
+            queryset = Post.objects.filter(user=user).select_related("user")
         else:
-            # Fetch all posts
-            queryset = Post.objects.all()
+            return Response(
+                {"detail": "Please provide a user_id to fetch posts."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -203,56 +204,85 @@ class PostViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comments.objects.all()
     serializer_class = CommentsSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Return comments for a specific post
         post_id = self.kwargs["post_pk"]
         return Comments.objects.filter(post=post_id).select_related("post", "user")
 
-    def perform_create(self, serializer):
+    def create(self, request, *args, **kwargs):
         # Save comment and increment total comments for the post
         post_id = self.kwargs["post_pk"]
+        post = get_object_or_404(Post, id=post_id)
 
-        try:
-            post = Post.objects.get(id=post_id)
-        except Post.DoesNotExist:
-            raise NotFound("Post does not exist")
+        # Check if the post is private and if the user is not a follower
+        if post.user.account_type == "private":
+            # Check if the user is a follower of the post's user
+            is_follower = Follow.objects.filter(
+                follower=self.request.user,
+                followed=post.user,
+                status="accepted",
+            ).exists()
+
+            if not is_follower:
+                raise PermissionDenied(
+                    "You cannot comment on a private post unless you are a follower."
+                )
+
+        # Create and validate the serializer
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
         with transaction.atomic():
-            serializer.save(user=self.request.user, post=post)
+            comment = serializer.save(user=self.request.user, post=post)
 
+            # Increment total_comments for the post
             post.total_comments += 1
             post.save()
+
+        return Response(
+            {
+                "detail": "Comment added successfully.",
+                "total_comments": post.total_comments,
+                "comment": serializer.data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
     def destroy(self, request, *args, **kwargs):
         # Delete a comment and decrement total comments for the post
         post_id = self.kwargs["post_pk"]
         comment_id = self.kwargs["comment_id"]
 
-        try:
-            post = Post.objects.get(id=post_id)
-        except Post.DoesNotExist:
-            raise NotFound("Post does not exist")
+        post = get_object_or_404(Post, id=post_id)
+        comment = get_object_or_404(Comments, post=post, id=comment_id)
 
-        comment = Comments.objects.get(post=post_id, id=comment_id)
+        if comment.user != request.user:
+            return Response(
+                {"detail": "You do not have permission to delete this comment."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         with transaction.atomic():
-
             comment.delete()
 
-            if post.total_comments > 0:
-                post.total_comments -= 1
-                post.save()
+            post.total_comments = max(0, post.total_comments - 1)
+            post.save()
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {
+                "detail": "Comment deleted successfully.",
+                "total_comments": post.total_comments,
+            },
+            status=status.HTTP_204_NO_CONTENT,
+        )
 
 
 # Handles Likes CRUD, Increment, Decrement
 class LikeViewSet(viewsets.ModelViewSet):
     queryset = Likes.objects.all()
     serializer_class = LikesSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         # Return likes for a specific post
@@ -262,11 +292,15 @@ class LikeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Like a post and increment total likes for the post
         post_id = self.kwargs["post_pk"]
+        post = get_object_or_404(Post, id=post_id)
 
-        try:
-            post = Post.objects.get(id=post_id)
-        except Post.DoesNotExist:
-            raise NotFound("Post does not exist")
+        if post.user.account_type == "private" and post.user != self.request.user:
+            is_following = Follow.objects.filter(
+                follower=self.request.user, followed=post.user, status="accepted"
+            ).exists()
+            if not is_following:
+                raise PermissionDenied("You cannot like a private post.")
+
         if Likes.objects.filter(user=self.request.user, post=post).exists():
             raise ValidationError("You have already liked this post.")
 
@@ -276,34 +310,42 @@ class LikeViewSet(viewsets.ModelViewSet):
             post.total_likes += 1
             post.save()
 
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+
+        post = get_object_or_404(Post, id=self.kwargs["post_pk"])
+        response.data["total_likes"] = post.total_likes
+        response.data["liked"] = True
+
+        return response
+
     def destroy(self, request, *args, **kwargs):
         # Remove like from post and decrement total likes for the post
         post_id = self.kwargs["post_pk"]
+        post = get_object_or_404(Post, id=post_id)
 
-        try:
-            post = Post.objects.get(id=post_id)
-        except Post.DoesNotExist:
-            raise NotFound("Post does not exist")
-
-        like = Likes.objects.filter(user=self.request.user, post=post).first()
-        if not like:
-            raise NotFound("You have not liked this post.")
+        like = get_object_or_404(Likes, user=self.request.user, post=post)
 
         with transaction.atomic():
             like.delete()
 
-            if post.total_likes > 0:
-                post.total_likes -= 1
-                post.save()
+            post.total_likes = max(0, post.total_likes - 1)
+            post.save()
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {
+                "detail": "Like removed successfully.",
+                "total_likes": post.total_likes,
+                "liked": False,
+            },
+            status=status.HTTP_204_NO_CONTENT,
+        )
 
 
-# Handles Reply CRUD, Increment, Decrement
 class ReplyViewSet(viewsets.ModelViewSet):
     queryset = Replies.objects.all()
     serializer_class = RepliesSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         # Return replies for a specific comment
@@ -312,38 +354,60 @@ class ReplyViewSet(viewsets.ModelViewSet):
             "comments", "user"
         )
 
-    def perform_create(self, serializer):
+    def create(self, request, *args, **kwargs):
         # Save reply and increment total replies for the comment
         comment_id = self.kwargs["comment_pk"]
-        try:
-            comment = Comments.objects.get(id=comment_id)
-        except Comments.DoesNotExist:
-            raise NotFound("Comment not found")
+        comment = get_object_or_404(Comments, id=comment_id)
+        post = comment.post
+
+        # Check if the post is private and if the user is not a follower
+        if post.user.account_type == "private":
+            # Check if the user is a follower of the post's user
+            is_follower = Follow.objects.filter(
+                follower=self.request.user,
+                followed=post.user,
+                status="accepted",
+            ).exists()
+
+            if not is_follower:
+                raise PermissionDenied(
+                    "You cannot reply on a private post unless you are a follower."
+                )
+
+        # Create and validate the serializer
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
         with transaction.atomic():
-            serializer.save(user=self.request.user, comments=comment)
+            # Save the reply and link it to the comment and user
+            reply = serializer.save(user=self.request.user, comments=comment)
 
+            # Increment total_replies for the comment
             comment.total_replies += 1
             comment.save()
+
+        return Response(
+            {
+                "detail": "Reply added successfully.",
+                "total_replies": comment.total_replies,
+                "reply": serializer.data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
     def destroy(self, request, *args, **kwargs):
         # Delete a reply and decrement total replies for the comment
         comment_id = self.kwargs["comment_pk"]
         reply_id = self.kwargs["reply_id"]
-
-        try:
-            comment = Comments.objects.get(id=comment_id)
-        except Comments.DoesNotExist:
-            raise NotFound("Comment not found.")
+        comment = get_object_or_404(Comments, id=comment_id)
 
         reply = Replies.objects.filter(id=reply_id, comment=comment_id)
 
         with transaction.atomic():
             reply.delete()
 
-            if comment.total_replies > 0:
-                comment.total_replies -= 1
-                comment.save()
+            comment.total_replies = max(0, comment.total_replies - 1)
+            comment.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -430,8 +494,10 @@ class FollowViewSet(viewsets.ModelViewSet):
             if request.user == user:
                 with transaction.atomic():
                     follow.delete()
-                    user.total_following -= 1
-                    followed_user.total_followers -= 1
+                    user.total_following = max(0, user.total_following - 1)
+                    followed_user.total_followers = max(
+                        0, followed_user.total_followers - 1
+                    )
                     user.save()
                     followed_user.save()
 
@@ -450,20 +516,13 @@ class FollowViewSet(viewsets.ModelViewSet):
 
 # View for profile page
 class ProfileViewPage(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         username = kwargs.get("username")
-        print(username)
+        user = get_object_or_404(User, username=username)
 
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            return Response(
-                {"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        self_user = self.request.user  # The currently logged-in user
+        self_user = self.request.user
 
         if username == self_user.username:
             # Display logged-in user details
@@ -477,7 +536,7 @@ class ProfileViewPage(APIView):
 
 # View for fetching posts liked by the user
 class LikedPostsView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         user = request.user
@@ -488,7 +547,7 @@ class LikedPostsView(APIView):
 
 # View for fetching posts commented on by the user
 class CommentedPostsView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         user = request.user
@@ -499,7 +558,7 @@ class CommentedPostsView(APIView):
 
 # View for fetching posts from users the user is following
 class FollowingPostsView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         user = request.user
@@ -513,28 +572,30 @@ class FollowingPostsView(APIView):
 
 # View for fetching users the user is following
 class FollowingUserView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         user = self.request.user
         # Fetch users the current user is following with 'accepted' status
-        following_users = User.objects.filter(
+        following = User.objects.filter(
             id__in=Follow.objects.filter(follower=user, status="accepted").values(
                 "followed"
             )
         )
-        serializer = UserSerializer(following_users, many=True)
+        serializer = UserSerializer(following, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# View for fetching where the user is the user being followed
+# View for fetching Other users following logged in user
 class FollowerUserView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         user = self.request.user
-        followed_users = User.objects.filter(
-            followers__followed=user, followers__status="accepted"
+        followers = User.objects.filter(
+            id__in=Follow.objects.filter(followed=user, status="accepted").values(
+                "follower"
+            )
         )
-        serializer = UserSerializer(followed_users, many=True)
+        serializer = UserSerializer(followers, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

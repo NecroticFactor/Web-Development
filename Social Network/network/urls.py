@@ -5,16 +5,16 @@ from rest_framework.routers import DefaultRouter
 from . import views
 
 auth_patterns = [
-    path("login", views.login_view, name="login"),
-    path("logout", views.logout_view, name="logout"),
-    path("register", views.register, name="register"),
-    path("update_profile", views.UpdateUserView.as_view(), name="update_profile"),
+    path("login/", views.login_view, name="login"),
+    path("logout/", views.logout_view, name="logout"),
+    path("register/", views.register, name="register"),
+    path("update_profile/", views.UpdateUserView.as_view(), name="update_profile"),
 ]
 
 page_patterns = [
     path("", views.index, name="index"),
     path(
-        "profile/<str:username>", views.ProfileViewPage.as_view(), name="profile-page"
+        "profile/<str:username>/", views.ProfileViewPage.as_view(), name="profile-page"
     ),
 ]
 

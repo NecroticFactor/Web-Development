@@ -13,6 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
             "last_name",
             "total_followers",
             "total_following",
+            "total_posts",
         ]
 
 
