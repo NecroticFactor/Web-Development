@@ -3,6 +3,7 @@ from django.db import IntegrityError, transaction
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -303,8 +304,68 @@ class ReplyViewSet(viewsets.ModelViewSet):
 # Handles Follow Logic
 class FollowViewSet(viewsets.ModelViewSet):
     queryset = Follow.objects.all()
-    serializer_class = FollowSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return FollowCreateSerializer
+        elif self.action in ["update", "partial_update"]:
+            return FollowUpdateSerializer
+        return FollowSerializer
+
+    def list(self, request, *args, **kwargs):
+        status_filter = request.query_params.get("status", "pending")
+        requests = Follow.objects.filter(followed=request.user, status=status_filter)
+        serializer = FollowSerializer(requests, many=True)
+        return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        followed_id = serializer.validated_data["followed_id"]
+        followed = get_object_or_404(User, id=followed_id)
+
+        if request.user == followed:
+            return Response({"error": "You cannot follow yourself."}, status=400)
+
+        follow, created = Follow.objects.get_or_create(
+            follower=request.user, followed=followed
+        )
+
+        if created:
+            follow.status = "pending"
+            follow.save()
+            return Response({"success": "Follow request sent."}, status=201)
+        elif follow.status == "pending":
+            return Response({"info": "Follow request already sent."}, status=200)
+        else:
+            return Response(
+                {"info": "You are already following this user."}, status=200
+            )
+
+    def update(self, request, pk=None, *args, **kwargs):
+        follow = get_object_or_404(
+            Follow, id=pk, followed=request.user, status="pending"
+        )
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        action = serializer.validated_data["status"]
+
+        if action == "approve":
+            follow.status = "accepted"
+            follow.save()
+            return Response({"success": "Follow request approved."}, status=200)
+
+        elif action == "reject":
+            follow.status = "rejected"
+            follow.save()
+            return Response({"success": "Follow request rejected."}, status=200)
+
+        return Response({"error": "Invalid action."}, status=400)
+
+    def partial_update(self, request, pk=None, *args, **kwargs):
+        return self.update(request, pk, *args, **kwargs)
 
 
 # # ----------------------SPECIAL VIEWS FOR SPECIAL QUERIES---------------------------------# #

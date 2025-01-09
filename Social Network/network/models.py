@@ -90,7 +90,6 @@ class Follow(models.Model):
         ("pending", "Pending"),
         ("accepted", "Accepted"),
         ("rejected", "Rejected"),
-        ("blocked", "Blocked"),
     ]
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
     created_at = models.DateTimeField(auto_now_add=True)

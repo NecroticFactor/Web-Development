@@ -78,9 +78,34 @@ class RepliesSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    follower = serializers.CharField(source="follower.username", read_only=True)
-    followed = serializers.CharField(source="followed.username", read_only=True)
+    followed_username = serializers.CharField(
+        source="followed.username", read_only=True
+    )
+    follower_username = serializers.CharField(
+        source="follower.username", read_only=True
+    )
 
     class Meta:
         model = Follow
-        fields = ["follower", "followed", "status", "created_at"]
+        fields = [
+            "id",
+            "follower_username",
+            "followed_username",
+            "followed",
+            "follower",
+            "status",
+            "created_at",
+        ]
+        read_only_fields = ["follower", "status", "created_at"]
+
+
+class FollowCreateSerializer(serializers.ModelSerializer):
+    followed_id = serializers.IntegerField()
+
+    class Meta:
+        model = Follow
+        fields = ["followed_id"]
+
+
+class FollowUpdateSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=["approve", "reject"])
