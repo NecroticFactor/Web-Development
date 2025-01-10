@@ -425,11 +425,13 @@ class FollowViewSet(viewsets.ModelViewSet):
         return FollowSerializer
 
     def list(self, request, *args, **kwargs):
+        # Return pending follow requests for the authenticated user
         requests = Follow.objects.filter(followed=request.user, status="pending")
         serializer = FollowSerializer(requests, many=True)
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
+        # Create a follow request
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         followed_id = serializer.validated_data["followed_id"]
@@ -464,6 +466,7 @@ class FollowViewSet(viewsets.ModelViewSet):
             )
 
     def update(self, request, pk=None, *args, **kwargs):
+        # Handle follow actions (approve, reject)
         follow = get_object_or_404(Follow, id=pk, followed=request.user)
 
         followed_user = follow.follower
@@ -474,7 +477,8 @@ class FollowViewSet(viewsets.ModelViewSet):
 
         action = serializer.validated_data["status"]
 
-        if action == "approve" and follow.status == "pending":
+        if action == "accept" and follow.status == "pending":
+            # Accept the follow request
             follow.status = "accepted"
 
             with transaction.atomic():
@@ -486,25 +490,32 @@ class FollowViewSet(viewsets.ModelViewSet):
 
             return Response({"success": "Follow request approved."}, status=200)
 
-        elif action == "unfollow" and follow.status == "accepted":
-            if request.user == user:
-                with transaction.atomic():
-                    follow.delete()
-                    user.total_following = max(0, user.total_following - 1)
-                    followed_user.total_followers = max(
-                        0, followed_user.total_followers - 1
-                    )
-                    user.save()
-                    followed_user.save()
-
-            return Response({"success": "Unfollowed User."}, status=200)
-
-        elif action == "reject" and follow.status == "pending":
+        elif action == "decline" and follow.status == "pending":
+            # Reject the follow request
             follow.delete()
             return Response({"success": "Follow request rejected."}, status=200)
 
         else:
-            return Response({"info": "Action already performed."}, status=200)
+            return Response(
+                {"info": "Action already performed or invalid."}, status=200
+            )
+
+    def destroy(self, request, pk=None, *args, **kwargs):
+        # Unfollow the user (delete the follow relationship)
+        follow = get_object_or_404(Follow, id=pk, follower=request.user)
+
+        followed_user = follow.followed
+        user = request.user
+
+        with transaction.atomic():
+            # Delete the follow relationship
+            follow.delete()
+            user.total_following = max(0, user.total_following - 1)
+            followed_user.total_followers = max(0, followed_user.total_followers - 1)
+            user.save()
+            followed_user.save()
+
+        return Response({"success": "Unfollowed User."}, status=200)
 
     @action(detail=False, methods=["get"], url_path="check-status")
     def check_status(self, request):

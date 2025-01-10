@@ -116,7 +116,7 @@ class FollowCreateSerializer(serializers.ModelSerializer):
 
 
 class FollowUpdateSerializer(serializers.Serializer):
-    status = serializers.ChoiceField(choices=["approve", "reject", "unfollow"])
+    status = serializers.ChoiceField(choices=["accept", "decline"])
 
 
 class BlockSerializer(serializers.ModelSerializer):
