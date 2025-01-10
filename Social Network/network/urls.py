@@ -48,6 +48,10 @@ post_router.register(r"likes", views.LikeViewSet, basename="post-likes")
 follow_router = DefaultRouter()
 follow_router.register(r"follow", views.FollowViewSet, basename="follow")
 
+# Block route
+block_router = DefaultRouter()
+block_router.register(r"block", views.BlockViewSet, basename="block")
+
 
 urlpatterns = (
     auth_patterns
@@ -57,4 +61,5 @@ urlpatterns = (
     + post_router.urls
     + comments_router.urls
     + follow_router.urls
+    + block_router.urls
 )

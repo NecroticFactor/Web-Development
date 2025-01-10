@@ -99,13 +99,12 @@ class FollowSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "follower_username",
+            "follower",
             "followed_username",
             "followed",
-            "follower",
             "status",
             "created_at",
         ]
-        read_only_fields = ["follower", "status", "created_at"]
 
 
 class FollowCreateSerializer(serializers.ModelSerializer):
@@ -118,3 +117,22 @@ class FollowCreateSerializer(serializers.ModelSerializer):
 
 class FollowUpdateSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=["approve", "reject", "unfollow"])
+
+
+class BlockSerializer(serializers.ModelSerializer):
+    blocked_username = serializers.CharField(source="blocked.username", read_only=True)
+    blocker_username = serializers.CharField(source="blocker.username", read_only=True)
+    blocked_id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = Blocked
+        fields = [
+            "blocked_username",
+            "blocked_id",
+            "blocker_username",
+            "blocker_id",
+            "created_at",
+        ]
+        read_only = [
+            "blocker_id",
+        ]

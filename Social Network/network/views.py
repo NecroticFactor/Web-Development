@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import NotFound, ValidationError, PermissionDenied
 
@@ -412,13 +413,11 @@ class ReplyViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# Handles Follow Logic
 class FollowViewSet(viewsets.ModelViewSet):
     queryset = Follow.objects.all()
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
-        # Return different serializers based on action
         if self.action == "create":
             return FollowCreateSerializer
         elif self.action in ["update", "partial_update"]:
@@ -426,13 +425,11 @@ class FollowViewSet(viewsets.ModelViewSet):
         return FollowSerializer
 
     def list(self, request, *args, **kwargs):
-        # Return pending follow requests for the authenticated user
         requests = Follow.objects.filter(followed=request.user, status="pending")
         serializer = FollowSerializer(requests, many=True)
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        # Create a follow request
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         followed_id = serializer.validated_data["followed_id"]
@@ -467,7 +464,6 @@ class FollowViewSet(viewsets.ModelViewSet):
             )
 
     def update(self, request, pk=None, *args, **kwargs):
-        # Handle follow actions (approve, unfollow, reject)
         follow = get_object_or_404(Follow, id=pk, followed=request.user)
 
         followed_user = follow.follower
@@ -509,6 +505,98 @@ class FollowViewSet(viewsets.ModelViewSet):
 
         else:
             return Response({"info": "Action already performed."}, status=200)
+
+    @action(detail=False, methods=["get"], url_path="check-status")
+    def check_status(self, request):
+        followed_id = request.query_params.get("followed_id")
+
+        if not followed_id:
+            raise ValidationError("'followed_id' is required.")
+
+        follow = Follow.objects.filter(
+            follower=request.user, followed_id=followed_id
+        ).first()
+
+        if follow:
+            return Response({"status": follow.status}, status=200)
+        return Response({"status": "none"}, status=404)
+
+
+# Blocked View to handle blocking and unblocking
+class BlockViewSet(viewsets.ModelViewSet):
+    queryset = Blocked.objects.all()
+    serializer_class = BlockSerializer
+
+    def get_queryset(self):
+        return Blocked.objects.filter(blocker=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        blocker = self.request.user
+        blocked_id = request.data.get("blocked_id")
+
+        if not blocked_id:
+            raise ValidationError({"error": "User ID is required to block user"})
+
+        blocked_user = get_object_or_404(User, id=blocked_id)
+
+        if blocker == blocked_user:
+            return Response({"error": "You cannot block yourself."}, status=400)
+
+        # save the users in the blocked model
+        Blocked.objects.create(blocker=blocker, blocked=blocked_user)
+
+        # Handle follow relationship between blocker and blocked
+        # 1. Check if they are following you
+        they_follow = Follow.objects.filter(
+            follower=blocked_user,
+            followed=blocker,
+            status__in=["pending", "accepted"],
+        ).first()
+
+        if they_follow:
+            with transaction.atomic():
+                they_follow.delete()
+                blocker.total_followers = max(0, blocker.total_followers - 1)
+                blocked_user.total_following = max(0, blocked_user.total_following - 1)
+                blocker.save()
+                blocked_user.save()
+
+        # 2. Check if you are following them
+        you_follow = Follow.objects.filter(
+            follower=blocker,
+            followed=blocked_user,
+            status__in=["pending", "accepted"],
+        ).first()
+
+        if you_follow:
+            with transaction.atomic():
+                blocker.total_following = max(0, blocker.total_following - 1)
+                blocked_user.total_followers = max(0, blocked_user.total_followers - 1)
+                blocker.save()
+                blocked_user.save()
+
+        return Response(
+            {
+                "message": "User has been blocked successfully.",
+                "blocked": True,
+            },
+            status=201,
+        )
+
+    def list(self, request, *args, **kwargs):
+        blocked_users = self.get_queryset()
+        serializer = self.get_serializer(blocked_users, many=True)
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Delete the block entry
+        instance.delete()
+
+        return Response(
+            {"message": "User has been unblocked successfully."}, status=200
+        )
 
 
 # # ----------------------SPECIAL VIEWS FOR SPECIAL QUERIES---------------------------------# #
