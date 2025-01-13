@@ -1545,7 +1545,7 @@ Checks the follow status between the authenticated user and another user.
 }
 ```
 
-- **_Response Example (if pending):_**
+- **Response Example (if pending):**
 
 ```json
 {
@@ -1565,3 +1565,246 @@ Checks the follow status between the authenticated user and another user.
   "status": "none"
 }
 ```
+
+---
+
+---
+
+### **Following Users API**
+
+#### **Endpoint**
+
+`GET /following/`
+
+#### **Description**
+
+Fetches a list of users that the authenticated user is following. Only users with an accepted follow relationship will be included in the response.
+
+#### **Request Method**
+
+`GET`
+
+#### **Request Headers**
+
+| Header          | Value            | Required | Description                        |
+| --------------- | ---------------- | -------- | ---------------------------------- |
+| `Authorization` | `Bearer <token>` | Yes      | The token for user authentication. |
+
+#### **Response**
+
+**On Success**
+
+- **Status Code:** `200 OK`
+- **Response Example:**
+
+```json
+[
+  {
+    "id": 2,
+    "username": "user2",
+    "account_type": "public",
+    "first_name": "Alice",
+    "last_name": "Johnson",
+    "total_followers": 150,
+    "total_following": 100,
+    "total_posts": 10
+  },
+  {
+    "id": 3,
+    "username": "user3",
+    "account_type": "private",
+    "first_name": "Bob",
+    "last_name": "Smith",
+    "total_followers": 80,
+    "total_following": 50,
+    "total_posts": 5
+  }
+]
+```
+
+#### **On Failure**
+
+1. User not authenticated:
+
+- **Status Code:** `401 Unauthorized`
+- **Response Example:**
+
+```json
+{
+  "detail": "Authentication credentials were not provided."
+}
+```
+
+#### **Notes**
+
+- **This endpoint requires the user to be authenticated.**
+- **The response includes details about each user the authenticated user is following, such as their profile information and metadata (e.g., total_followers, total_posts).**
+- **The follow relationship must have a status of “accepted” for a user to appear in the list.**
+
+---
+
+### **Followers API**
+
+#### **Endpoint**
+
+`GET /followers/`
+
+#### **Description**
+
+Fetches a list of users who are following the authenticated user. Only users with an accepted follow relationship will be included in the response.
+
+#### **Request Method**
+
+`GET`
+
+#### **Request Headers**
+
+| Header          | Value            | Required | Description                        |
+| --------------- | ---------------- | -------- | ---------------------------------- |
+| `Authorization` | `Bearer <token>` | Yes      | The token for user authentication. |
+
+#### **Response**
+
+**On Success**
+
+- **Status Code:** `200 OK`
+- **Response Example:**
+
+```json
+[
+  {
+    "id": 5,
+    "username": "user5",
+    "account_type": "public",
+    "first_name": "Charlie",
+    "last_name": "Brown",
+    "total_followers": 120,
+    "total_following": 90,
+    "total_posts": 15
+  },
+  {
+    "id": 6,
+    "username": "user6",
+    "account_type": "private",
+    "first_name": "Dana",
+    "last_name": "White",
+    "total_followers": 75,
+    "total_following": 40,
+    "total_posts": 7
+  }
+]
+```
+
+#### **On Failure**
+
+1. User not authenticated:
+
+- **Status Code:** `401 Unauthorized`
+- **Response Example:**
+
+```json
+{
+  "detail": "Authentication credentials were not provided."
+}
+```
+
+#### **Notes**
+
+- **This endpoint requires the user to be authenticated.**
+- **The response includes details about each user following the authenticated user, such as their profile information and metadata (e.g., total_followers, total_posts).**
+- **The follow relationship must have a status of “accepted” for a user to appear in the list.**
+
+---
+
+---
+
+### **Following Posts API**
+
+#### **Endpoint**
+
+`GET /following-posts/`
+
+#### **Description**
+
+Fetches posts created by users that the authenticated user is following. Only posts from users with an accepted follow relationship will be included in the response.
+
+#### **Request Method**
+
+`GET`
+
+#### **Request Headers**
+
+| Header          | Value            | Required | Description                        |
+| --------------- | ---------------- | -------- | ---------------------------------- |
+| `Authorization` | `Bearer <token>` | Yes      | The token for user authentication. |
+
+#### **Response**
+
+**On Success**
+
+- **Status Code:** `200 OK`
+- **Response Example:**
+
+```json
+[
+  {
+    "id": 1,
+    "user": {
+      "id": 3,
+      "username": "user3",
+      "account_type": "public",
+      "first_name": "Jane",
+      "last_name": "Doe",
+      "total_followers": 100,
+      "total_following": 50,
+      "total_posts": 20
+    },
+    "title": "A Day in the Life",
+    "body": "This is a post by someone you're following.",
+    "total_likes": 15,
+    "total_comments": 5,
+    "created_at": "2025-01-13T12:00:00Z"
+  },
+  {
+    "id": 2,
+    "user": {
+      "id": 4,
+      "username": "user4",
+      "account_type": "private",
+      "first_name": "John",
+      "last_name": "Smith",
+      "total_followers": 80,
+      "total_following": 30,
+      "total_posts": 10
+    },
+    "title": "Learning Markdown",
+    "body": "Here's a post about Markdown basics.",
+    "total_likes": 25,
+    "total_comments": 8,
+    "created_at": "2025-01-12T10:00:00Z"
+  }
+]
+```
+
+#### **On Failure**
+
+1. User not authenticated:
+
+- **Status Code:** `401 Unauthorized`
+- **Response Example:**
+
+```json
+{
+  "detail": "Authentication credentials were not provided."
+}
+```
+
+#### **Notes**
+
+- **This endpoint requires the user to be authenticated.**
+- **The response includes posts created by users whom the authenticated user is following, and the follow relationship must have a status of “accepted.”**
+- **Each post includes nested user details, such as the user’s profile information and metadata about the post.**
+
+---
+
+---
