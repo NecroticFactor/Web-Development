@@ -1281,7 +1281,9 @@ Deletes a specific reply under a comment. This action will decrement the total_r
 
 `/follow/`
 
-### **GET /follow/**
+#### **Request Method**
+
+`GET /follow/`
 
 #### **Description**
 
@@ -1323,7 +1325,7 @@ Fetches the list of pending follow requests for the authenticated user.
 
 ### **Send Request Follow API**
 
-### **Endpoint**
+#### **Endpoint**
 
 `POST /follow/`
 
@@ -1504,7 +1506,7 @@ Unfollows a user by deleting the follow relationship.
 }
 ```
 
-### Check Request Status API\*\*
+### **Check Request Status API**
 
 #### **Endpoint**
 
