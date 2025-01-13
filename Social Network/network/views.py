@@ -6,7 +6,9 @@ from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
+from django.http import JsonResponse
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import NotFound, ValidationError, PermissionDenied
@@ -30,8 +32,16 @@ def login_view(request):
 
         # Check if authentication successful
         if user is not None:
-            login(request, user)
-            return HttpResponseRedirect(reverse("index"))
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+            refresh_token = str(refresh)
+
+            return JsonResponse(
+                {
+                    "access": access_token,
+                    "refresh": refresh_token,
+                }
+            )
         else:
             return render(
                 request,
