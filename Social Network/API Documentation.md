@@ -1,4 +1,4 @@
-### API Documentation
+## API Documentation
 
 ### **Login API**
 
@@ -1153,7 +1153,7 @@ Fetches all replies for a specific comment under a post.
   ]
   ```
 
-#### **Create Reply API**
+### **Create Reply API**
 
 #### **Endpoint**
 
@@ -1232,7 +1232,7 @@ Adds a new reply to a specific comment. If the post is private, the user must be
 }
 ```
 
-#### **Delete Reply API**
+### **Delete Reply API**
 
 #### **Endpoint**
 
@@ -1321,7 +1321,7 @@ Fetches the list of pending follow requests for the authenticated user.
 ]
 ```
 
-#### **Send Request Follow API**
+### **Send Request Follow API**
 
 ### **Endpoint**
 
@@ -1394,6 +1394,8 @@ Creates a follow request for a user. If the followed user’s account is public,
 }
 ```
 
+### **Accept or Reject Request API**
+
 #### **Endpoint**
 
 `PUT /follow/{follow_id}/`
@@ -1456,6 +1458,8 @@ Handles follow actions (approve or reject follow requests).
 }
 ```
 
+### **Unfollow User API**
+
 #### **Endpoint**
 
 `DELETE /follow/{follow_id}/`
@@ -1499,6 +1503,8 @@ Unfollows a user by deleting the follow relationship.
   "detail": "Not found."
 }
 ```
+
+### Check Request Status API\*\*
 
 #### **Endpoint**
 
