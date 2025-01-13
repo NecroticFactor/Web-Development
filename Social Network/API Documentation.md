@@ -58,6 +58,8 @@ Authenticates a user with their username and password and logs them in if the cr
 
 ---
 
+---
+
 ### **Register API**
 
 #### **Endpoint**
@@ -133,6 +135,8 @@ Registers a new user by creating an account with a username, email, and password
 
 ---
 
+---
+
 ### **Logout API**
 
 #### **Endpoint**
@@ -158,6 +162,8 @@ Logs out the currently authenticated user and redirects them to the index page.
 
 - This endpoint requires no request body or parameters.
 - It clears the user's session and logs them out.
+
+---
 
 ---
 
@@ -252,6 +258,8 @@ Allows an authenticated user to update their username and account type. Validate
 
 ---
 
+---
+
 ### **Posts API**
 
 #### **Base Endpoint**
@@ -262,12 +270,11 @@ Allows an authenticated user to update their username and account type. Validate
 
 Provides CRUD operations for posts. Users can create, retrieve, update, delete, and list posts. The endpoint enforces authentication and respects user privacy settings.
 
----
+### **Endpoints**
 
-### **Posts API**
+#### **1. List Posts**
 
-#### **Endpoint**
-
+**Endpoint**
 `GET /posts/`
 
 #### **Description**
@@ -371,12 +378,101 @@ Fetches posts for a specific user. If the user is private, only followers with a
    }
    ```
 
+#### **2. Create a Post**
+
+**Endpoint**
+`POST /posts/`
+
+**Description**
+Creates a new post for the authenticated user.
+
+**Request Body Example**
+
+```json
+{
+  "content": "This is my new post!"
+}
+```
+
+**Response**
+
+**On Success**
+
+- **Status Code:** `201 Created`
+- **Response Example:**
+
+```json
+{
+  "id": 1,
+  "user": 2,
+  "content": "This is my new post!",
+  "created_at": "2025-01-13T10:00:00Z"
+}
+```
+
+**On Failure**
+
+1. User not authenticated:
+   - **Status Code:** `401 Unauthorized`
+   - **Response Example:**
+   ```json
+   {
+     "detail": "Authentication credentials were not provided."
+   }
+   ```
+
+#### **3. Delete a Post**
+
+**Endpoint**
+`DELETE /posts/{id}/`
+
+**Description**
+Deletes a specific post belonging to the authenticated user.
+
+**Response**
+
+**On Success**
+
+- **Status Code:** `204 No Content`
+- **Response Example:**
+
+```json
+{
+  "detail": "Post deleted successfully.",
+  "total_posts": 5
+}
+```
+
+**On Failure**
+
+1. Post not found:
+
+   - **Status Code:** `404 Not Found`
+   - **Response Example:**
+
+   ```json
+   {
+     "detail": "Post does not exist"
+   }
+   ```
+
+2. User not authenticated:
+   - **Status Code:** `401 Unauthorized`
+   - **Response Example:**
+   ```json
+   {
+     "detail": "Authentication credentials were not provided."
+   }
+   ```
+
 #### **Notes**
 
 - This endpoint requires the user to be authenticated.
 - You must provide a `user_id` to fetch posts for a specific user.
 - If the user's account is private, only users who follow them with an accepted request can view their posts.
 - The response includes nested details about the user and post, such as `user`'s profile information and `post`'s like and comment counts.
+
+---
 
 ---
 
@@ -689,6 +785,8 @@ Fetches all posts that the authenticated user has commented on. The user must be
 
 ---
 
+---
+
 ### **Likes API**
 
 #### **Endpoint**
@@ -920,8 +1018,6 @@ Removes a like from a post. The user must be the one who liked the post.
      "detail": "Post not found."
    }
    ```
-
----
 
 ### **Liked Posts API**
 
