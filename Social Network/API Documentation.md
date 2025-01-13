@@ -1153,6 +1153,8 @@ Fetches all replies for a specific comment under a post.
   ]
   ```
 
+#### **Create Reply API**
+
 #### **Endpoint**
 
 `POST /posts/{post_id}/comments/{comment_id}/replies/`
@@ -1229,6 +1231,8 @@ Adds a new reply to a specific comment. If the post is private, the user must be
   "content": ["This field is required."]
 }
 ```
+
+#### **Delete Reply API**
 
 #### **Endpoint**
 
