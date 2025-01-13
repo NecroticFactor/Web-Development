@@ -129,4 +129,117 @@ Registers a new user by creating an account with a username, email, and password
 - This endpoint requires a `POST` request. If accessed with a `GET` request, the registration page is rendered.
 - Ensure that all fields are included in the request body and are valid.
 
-Let me know when you’re ready for the next one!
+### **Logout API**
+
+#### **Endpoint**
+
+`GET /logout/`
+
+#### **Description**
+
+Logs out the currently authenticated user and redirects them to the index page.
+
+#### **Request Method**
+
+`GET`
+
+#### **Response**
+
+**On Success**
+
+- **Status Code:** `302 Found` (Redirects to the index page)
+- **Description:** User is successfully logged out.
+
+#### **Notes**
+
+- This endpoint requires no request body or parameters.
+- It clears the user's session and logs them out.
+
+### **Update User Profile API**
+
+#### **Endpoint**
+
+`PUT /update_profile/`
+
+#### **Description**
+
+Allows an authenticated user to update their username and account type. Validates the account type and ensures no duplicate usernames.
+
+#### **Request Method**
+
+`PUT`
+
+#### **Request Headers**
+
+| Header          | Value            | Required | Description                        |
+| --------------- | ---------------- | -------- | ---------------------------------- |
+| `Authorization` | `Bearer <token>` | Yes      | The token for user authentication. |
+
+#### **Request Parameters**
+
+| Parameter      | Type     | Required | Description                                                              |
+| -------------- | -------- | -------- | ------------------------------------------------------------------------ |
+| `username`     | `string` | No       | The new username for the user.                                           |
+| `account_type` | `string` | No       | The new account type for the user. Must be either `private` or `public`. |
+
+#### **Request Body Example**
+
+```json
+{
+  "username": "newusername",
+  "account_type": "private"
+}
+```
+
+#### **Response**
+
+**On Success**
+
+- **Status Code:** `200 OK`
+- **Description:** User details updated successfully.
+- **Response Example:**
+
+```json
+{
+  "detail": "User updated successfully."
+}
+```
+
+**On Failure**
+
+1. Invalid account type:
+
+   - **Status Code:** `400 Bad Request`
+   - **Response Example:**
+
+   ```json
+   {
+     "account_type": "Invalid account type. Allowed values are: ['private', 'public']"
+   }
+   ```
+
+2. Username already taken:
+
+   - **Status Code:** `400 Bad Request`
+   - **Response Example:**
+
+   ```json
+   {
+     "detail": "Username already taken."
+   }
+   ```
+
+3. No changes detected:
+   - **Status Code:** `304 Not Modified`
+   - **Response Example:**
+   ```json
+   {
+     "detail": "No changes detected."
+   }
+   ```
+
+#### **Notes**
+
+- The `account_type` must be either `private` or `public`.
+- If no fields are provided in the request body, the current values for `username` and `account_type` will remain unchanged.
+- This endpoint requires the user to be authenticated.
