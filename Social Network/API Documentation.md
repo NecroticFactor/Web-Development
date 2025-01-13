@@ -1813,120 +1813,121 @@ Fetches posts created by users that the authenticated user is following. Only po
 
 #### **Endpoints**
 
-1. ### **List Blocked Users**
+### 1. **List Blocked Users**
 
-   - **Endpoint:** `GET /block/`
-   - **Description:** Fetches a list of users blocked by the authenticated user.
-   - **Request Method:** `GET`
-   - **Request Headers:**
-     | Header | Value | Required | Description |
-     | --------------- | ---------------- | -------- | ---------------------------------- |
-     | `Authorization` | `Bearer <token>` | Yes | The token for user authentication. |
-   - **Response:**
-     **On Success**
-     - **Status Code:** `200 OK`
-     - **Response Example:**
-     ```json
-     [
-       {
-         "id": 1,
-         "blocker": 5,
-         "blocked": {
-           "id": 6,
-           "username": "blocked_user",
-           "first_name": "Blocked",
-           "last_name": "User",
-           "account_type": "public"
-         }
-       }
-     ]
-     ```
-     **On Failure**
-     - **Status Code:** `401 Unauthorized`
-     - **Response Example:**
-     ```json
-     {
-       "detail": "Authentication credentials were not provided."
-     }
-     ```
+- **Endpoint:** `GET /block/`
+- **Description:** Fetches a list of users blocked by the authenticated user.
+- **Request Method:** `GET`
+- **Request Headers:**
+  | Header | Value | Required | Description |
+  | --------------- | ---------------- | -------- | ---------------------------------- |
+  | `Authorization` | `Bearer <token>` | Yes | The token for user authentication. |
+- **Response:**
+  **On Success**
+  - **Status Code:** `200 OK`
+  - **Response Example:**
+  ```json
+  [
+    {
+      "id": 1,
+      "blocker": 5,
+      "blocked": {
+        "id": 6,
+        "username": "blocked_user",
+        "first_name": "Blocked",
+        "last_name": "User",
+        "account_type": "public"
+      }
+    }
+  ]
+  ```
+  **On Failure**
+  - **Status Code:** `401 Unauthorized`
+  - **Response Example:**
+  ```json
+  {
+    "detail": "Authentication credentials were not provided."
+  }
+  ```
 
-2. ### **Block a User**
+### 2. **Block a User**
 
-   - **Endpoint:** `POST /block/`
-   - **Description:** Blocks a user and removes any existing follow relationship between the blocker and the blocked user.
-   - **Request Method:** `POST`
-   - **Request Headers:**
-     | Header | Value | Required | Description |
-     | --------------- | ---------------- | -------- | ---------------------------------- |
-     | `Authorization` | `Bearer <token>` | Yes | The token for user authentication. |
-   - **Request Body:**
-     ```json
-     {
-       "blocked_id": 6
-     }
-     ```
-   - **Response:**
-     **On Success**
-     - **Status Code:** `201 Created`
-     - **Response Example:**
-     ```json
-     {
-       "message": "User has been blocked successfully.",
-       "blocked": true
-     }
-     ```
-     **On Failure**
-     - Missing `blocked_id`:
-       - **Status Code:** `400 Bad Request`
-       - **Response Example:**
-       ```json
-       {
-         "error": "User ID is required to block user"
-       }
-       ```
-     - Attempting to block oneself:
-       - **Status Code:** `400 Bad Request`
-       - **Response Example:**
-       ```json
-       {
-         "error": "You cannot block yourself."
-       }
-       ```
-     - User not authenticated:
-       - **Status Code:** `401 Unauthorized`
-       - **Response Example:**
-       ```json
-       {
-         "detail": "Authentication credentials were not provided."
-       }
-       ```
+- **Endpoint:** `POST /block/`
+- **Description:** Blocks a user and removes any existing follow relationship between the blocker and the blocked user.
+- **Request Method:** `POST`
+- **Request Headers:**
+  | Header | Value | Required | Description |
+  | --------------- | ---------------- | -------- | ---------------------------------- |
+  | `Authorization` | `Bearer <token>` | Yes | The token for user authentication. |
+- **Request Body:**
+  ```json
+  {
+    "blocked_id": 6
+  }
+  ```
+- **Response:**
+  **On Success**
+  - **Status Code:** `201 Created`
+  - **Response Example:**
+  ```json
+  {
+    "message": "User has been blocked successfully.",
+    "blocked": true
+  }
+  ```
+  **On Failure**
+  - Missing `blocked_id`:
+    - **Status Code:** `400 Bad Request`
+    - **Response Example:**
+    ```json
+    {
+      "error": "User ID is required to block user"
+    }
+    ```
+  - Attempting to block oneself:
+    - **Status Code:** `400 Bad Request`
+    - **Response Example:**
+    ```json
+    {
+      "error": "You cannot block yourself."
+    }
+    ```
+  - User not authenticated:
+    - **Status Code:** `401 Unauthorized`
+    - **Response Example:**
+    ```json
+    {
+      "detail": "Authentication credentials were not provided."
+    }
+    ```
 
-3. ### **Unblock a User**
-   - **Endpoint:** `DELETE /block/{id}/`
-   - **Description:** Unblocks a user by deleting the block entry.
-   - **Request Method:** `DELETE`
-   - **Request Headers:**
-     | Header | Value | Required | Description |
-     | --------------- | ---------------- | -------- | ---------------------------------- |
-     | `Authorization` | `Bearer <token>` | Yes | The token for user authentication. |
-   - **Response:**
-     **On Success**
-     - **Status Code:** `200 OK`
-     - **Response Example:**
-     ```json
-     {
-       "message": "User has been unblocked successfully."
-     }
-     ```
-     **On Failure**
-     - User not authenticated:
-       - **Status Code:** `401 Unauthorized`
-       - **Response Example:**
-       ```json
-       {
-         "detail": "Authentication credentials were not provided."
-       }
-       ```
+### 3. **Unblock a User**
+
+- **Endpoint:** `DELETE /block/{id}/`
+- **Description:** Unblocks a user by deleting the block entry.
+- **Request Method:** `DELETE`
+- **Request Headers:**
+  | Header | Value | Required | Description |
+  | --------------- | ---------------- | -------- | ---------------------------------- |
+  | `Authorization` | `Bearer <token>` | Yes | The token for user authentication. |
+- **Response:**
+  **On Success**
+  - **Status Code:** `200 OK`
+  - **Response Example:**
+  ```json
+  {
+    "message": "User has been unblocked successfully."
+  }
+  ```
+  **On Failure**
+  - User not authenticated:
+    - **Status Code:** `401 Unauthorized`
+    - **Response Example:**
+    ```json
+    {
+      "detail": "Authentication credentials were not provided."
+    }
+    ```
 
 #### **Notes**
 
