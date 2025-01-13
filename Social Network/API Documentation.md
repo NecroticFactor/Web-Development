@@ -1274,3 +1274,286 @@ Deletes a specific reply under a comment. This action will decrement the total_r
 ---
 
 ---
+
+### **Follow API**
+
+#### **Base Endpoint**
+
+`/follow/`
+
+### **GET /follow/**
+
+#### **Description**
+
+Fetches the list of pending follow requests for the authenticated user.
+
+#### **Request Method**
+
+`GET`
+
+#### **Request Headers**
+
+| Header          | Value            | Required | Description                        |
+| --------------- | ---------------- | -------- | ---------------------------------- |
+| `Authorization` | `Bearer <token>` | Yes      | The token for user authentication. |
+
+#### **Response**
+
+**On Success**
+
+- **Status Code:** `200 OK`
+- **Response Example:**
+
+```json
+[
+  {
+    "id": 1,
+    "follower": {
+      "id": 2,
+      "username": "user2"
+    },
+    "followed": {
+      "id": 1,
+      "username": "user1"
+    },
+    "status": "pending"
+  }
+]
+```
+
+#### **Send Request Follow API**
+
+### **Endpoint**
+
+`POST /follow/`
+
+#### **Description**
+
+Creates a follow request for a user. If the followed user’s account is public, the follow request is automatically accepted.
+
+#### **Request Method**
+
+`POST`
+
+#### **Request Headers**
+
+| Header          | Value            | Required | Description                        |
+| --------------- | ---------------- | -------- | ---------------------------------- |
+| `Authorization` | `Bearer <token>` | Yes      | The token for user authentication. |
+
+#### **Request Body**
+
+```json
+{
+  "followed_id": 2
+}
+```
+
+#### **Response**
+
+**On Success**
+
+- **Status Code:** `201 Created`
+- **Response Example (for public accounts):**
+
+```json
+{
+  "success": "Followed User."
+}
+```
+
+- **Response Example (for private accounts):**
+
+```json
+{
+  "success": "Follow request sent."
+}
+```
+
+**On Failure**
+
+1. Follow request already sent:
+
+- **Status Code:** `200 OK`
+- **Response Example:**
+
+```json
+{
+  "info": "Follow request already sent."
+}
+```
+
+2. User tries to follow themselves:
+
+- **Status Code: 400 Bad Request**
+- **Response Example:**
+
+```json
+{
+  "error": "You cannot follow yourself."
+}
+```
+
+#### **Endpoint**
+
+`PUT /follow/{follow_id}/`
+
+#### **Description**
+
+Handles follow actions (approve or reject follow requests).
+
+#### **Request Method**
+
+`PUT`
+
+#### **Request Headers**
+
+| Header          | Value            | Required | Description                        |
+| --------------- | ---------------- | -------- | ---------------------------------- |
+| `Authorization` | `Bearer <token>` | Yes      | The token for user authentication. |
+
+#### **Request Body**
+
+```json
+{
+  "status": "accept"
+}
+```
+
+- **status can be either "accept" or "decline".**
+
+#### **Response**
+
+**On Success**
+
+- **Status Code:** `200 OK`
+- **Response Example (when accepted):**
+
+```json
+{
+  "success": "Follow request approved."
+}
+```
+
+**Response Example (when declined):**
+
+```json
+{
+  "success": "Follow request rejected."
+}
+```
+
+**On Failure**
+
+1. Invalid or already processed action:
+
+- **Status Code:** `200 OK`
+- **Response Example:**
+
+```json
+{
+  "info": "Action already performed or invalid."
+}
+```
+
+#### **Endpoint**
+
+`DELETE /follow/{follow_id}/`
+
+#### **Description**
+
+Unfollows a user by deleting the follow relationship.
+
+#### **Request Method**
+
+`DELETE`
+
+#### **Request Headers**
+
+| Header          | Value            | Required | Description                        |
+| --------------- | ---------------- | -------- | ---------------------------------- |
+| `Authorization` | `Bearer <token>` | Yes      | The token for user authentication. |
+
+#### **Response**
+
+**On Success**
+
+- **Status Code:** `200 OK`
+- **Response Example:**
+
+```json
+{
+  "success": "Unfollowed User."
+}
+```
+
+**On Failure**
+
+1. Follow relationship not found:
+
+- **Status Code:** `404 Not Found`
+- **Response Example:**
+
+```json
+{
+  "detail": "Not found."
+}
+```
+
+#### **Endpoint**
+
+`GET /follow/check-status/`
+
+#### **Description**
+
+Checks the follow status between the authenticated user and another user.
+
+#### **Request Method**
+
+`GET`
+
+#### **Request Headers**
+
+| Header          | Value            | Required | Description                        |
+| --------------- | ---------------- | -------- | ---------------------------------- |
+| `Authorization` | `Bearer <token>` | Yes      | The token for user authentication. |
+
+#### **Query Parameters**
+
+| Parameter     | Type  | Required | Description                              |
+| ------------- | ----- | -------- | ---------------------------------------- |
+| `followed_id` | `int` | Yes      | The ID of the user to check status with. |
+
+#### **Response**
+
+**On Success**
+
+- **Status Code:** `200 OK`
+- **Response Example (if following):**
+
+```json
+{
+  "status": "accepted"
+}
+```
+
+- **_Response Example (if pending):_**
+
+```json
+{
+  "status": "pending"
+}
+```
+
+**On Failure**
+
+1. Follow relationship does not exist:
+
+- **Status Code:** `404 Not Found`
+- **Response Example:**
+
+```json
+{
+  "status": "none"
+}
+```
