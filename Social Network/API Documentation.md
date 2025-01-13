@@ -706,13 +706,65 @@ Deletes a comment from a specific post. The user must be the owner of the commen
    ```
 
 3. Comment not found:
+
    - **Status Code:** `404 Not Found`
    - **Response Example:**
+
    ```json
    {
      "detail": "Comment not found."
    }
    ```
+
+### Commented Posts API
+
+#### Endpoint
+
+`GET /commented-posts/`
+
+#### Description
+
+Fetches all posts that the authenticated user has commented on. The user must be authenticated to access this endpoint.
+
+#### Request Method
+
+`GET`
+
+#### Request Headers
+
+| Header          | Value            | Required | Description                        |
+| --------------- | ---------------- | -------- | ---------------------------------- |
+| `Authorization` | `Bearer <token>` | Yes      | The token for user authentication. |
+
+#### Response
+
+**On Success**
+
+- **Status Code:** `200 OK`
+- **Response Example:**
+
+```json
+[
+  {
+    "id": 1,
+    "user": {
+      "id": 2,
+      "username": "user2",
+      "account_type": "public",
+      "first_name": "John",
+      "last_name": "Doe",
+      "total_followers": 100,
+      "total_following": 150,
+      "total_posts": 5
+    },
+    "title": "First Post",
+    "body": "This is the content of the first post.",
+    "total_likes": 10,
+    "total_comments": 5,
+    "created_at": "2025-01-13T10:00:00Z"
+  }
+]
+```
 
 ---
 
@@ -794,58 +846,6 @@ Fetches all likes for a specific post. Users can like a post if the post is publ
    }
    ```
 
----
-
-### Commented Posts API
-
-#### Endpoint
-
-`GET /commented-posts/`
-
-#### Description
-
-Fetches all posts that the authenticated user has commented on. The user must be authenticated to access this endpoint.
-
-#### Request Method
-
-`GET`
-
-#### Request Headers
-
-| Header          | Value            | Required | Description                        |
-| --------------- | ---------------- | -------- | ---------------------------------- |
-| `Authorization` | `Bearer <token>` | Yes      | The token for user authentication. |
-
-#### Response
-
-**On Success**
-
-- **Status Code:** `200 OK`
-- **Response Example:**
-
-```json
-[
-  {
-    "id": 1,
-    "user": {
-      "id": 2,
-      "username": "user2",
-      "account_type": "public",
-      "first_name": "John",
-      "last_name": "Doe",
-      "total_followers": 100,
-      "total_following": 150,
-      "total_posts": 5
-    },
-    "title": "First Post",
-    "body": "This is the content of the first post.",
-    "total_likes": 10,
-    "total_comments": 5,
-    "created_at": "2025-01-13T10:00:00Z"
-  }
-]
-```
-
 ### **Create Like API**
 
 #### **Endpoint**
@@ -925,8 +925,6 @@ Likes a specific post. The post must be public or the user must be a follower of
      "detail": "You have already liked this post."
    }
    ```
-
----
 
 ### **Delete Like API**
 
