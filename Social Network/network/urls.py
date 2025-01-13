@@ -14,7 +14,9 @@ auth_patterns = [
 page_patterns = [
     path("", views.index, name="index"),
     path(
-        "profile/<str:username>/", views.ProfileViewPage.as_view(), name="profile-page"
+        "profile/<str:username>/",
+        views.ProfileViewPage.as_view(),
+        name="profile-page",
     ),
 ]
 
