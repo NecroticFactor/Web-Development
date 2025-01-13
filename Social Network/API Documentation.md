@@ -56,6 +56,8 @@ Authenticates a user with their username and password and logs them in if the cr
 - This endpoint requires a `POST` request. If accessed with a `GET` request, the login page is rendered.
 - Ensure that the `username` and `password` fields are sent as part of a form-encoded request body (`application/x-www-form-urlencoded`).
 
+---
+
 ### **Register API**
 
 #### **Endpoint**
@@ -129,6 +131,8 @@ Registers a new user by creating an account with a username, email, and password
 - This endpoint requires a `POST` request. If accessed with a `GET` request, the registration page is rendered.
 - Ensure that all fields are included in the request body and are valid.
 
+---
+
 ### **Logout API**
 
 #### **Endpoint**
@@ -154,6 +158,8 @@ Logs out the currently authenticated user and redirects them to the index page.
 
 - This endpoint requires no request body or parameters.
 - It clears the user's session and logs them out.
+
+---
 
 ### **Update User Profile API**
 
@@ -243,6 +249,8 @@ Allows an authenticated user to update their username and account type. Validate
 - The `account_type` must be either `private` or `public`.
 - If no fields are provided in the request body, the current values for `username` and `account_type` will remain unchanged.
 - This endpoint requires the user to be authenticated.
+
+---
 
 ### **Posts API**
 
@@ -370,90 +378,7 @@ Fetches posts for a specific user. If the user is private, only followers with a
 - If the user's account is private, only users who follow them with an accepted request can view their posts.
 - The response includes nested details about the user and post, such as `user`'s profile information and `post`'s like and comment counts.
 
-### **Liked Posts API**
-
-#### **Endpoint**
-
-`GET /liked-posts/`
-
-#### **Description**
-
-Fetches the posts that have been liked by the authenticated user. The response includes nested user and post details.
-
-#### **Request Method**
-
-`GET`
-
-#### **Request Headers**
-
-| Header          | Value            | Required | Description                        |
-| --------------- | ---------------- | -------- | ---------------------------------- |
-| `Authorization` | `Bearer <token>` | Yes      | The token for user authentication. |
-
-#### **Response**
-
-**On Success**
-
-- **Status Code:** `200 OK`
-- **Response Example:**
-
-```json
-[
-  {
-    "id": 1,
-    "user": {
-      "id": 2,
-      "username": "user2",
-      "account_type": "public",
-      "first_name": "John",
-      "last_name": "Doe",
-      "total_followers": 100,
-      "total_following": 150,
-      "total_posts": 5
-    },
-    "title": "This is a liked post",
-    "body": "Content of the liked post",
-    "total_likes": 10,
-    "total_comments": 3,
-    "created_at": "2025-01-13T10:00:00Z"
-  },
-  {
-    "id": 2,
-    "user": {
-      "id": 3,
-      "username": "user3",
-      "account_type": "private",
-      "first_name": "Jane",
-      "last_name": "Smith",
-      "total_followers": 50,
-      "total_following": 75,
-      "total_posts": 3
-    },
-    "title": "This is another liked post",
-    "body": "Content of another liked post",
-    "total_likes": 5,
-    "total_comments": 1,
-    "created_at": "2025-01-12T10:00:00Z"
-  }
-]
-```
-
-**On Failure**
-
-1. User not authenticated:
-   - **Status Code:** `401 Unauthorized`
-   - **Response Example:**
-   ```json
-   {
-     "detail": "Authentication credentials were not provided."
-   }
-   ```
-
-#### **Notes**
-
-- This endpoint requires the user to be authenticated.
-- Only posts that the user has liked will be returned.
-- The response includes nested details about the user and post, such as `user`'s profile information and `post`'s like and comment counts.
+---
 
 ### **Comments API**
 
@@ -547,8 +472,6 @@ Fetches all comments under a specific post. Comments can only be created or view
    }
    ```
 
----
-
 ### **Create Comment API**
 
 #### **Endpoint**
@@ -637,8 +560,6 @@ Adds a comment to a specific post. The post must be accessible by the user (eith
      "detail": "You cannot comment on a private post unless you are a follower."
    }
    ```
-
----
 
 ### **Delete Comment API**
 
@@ -999,3 +920,90 @@ Removes a like from a post. The user must be the one who liked the post.
      "detail": "Post not found."
    }
    ```
+
+---
+
+### **Liked Posts API**
+
+#### **Endpoint**
+
+`GET /liked-posts/`
+
+#### **Description**
+
+Fetches the posts that have been liked by the authenticated user. The response includes nested user and post details.
+
+#### **Request Method**
+
+`GET`
+
+#### **Request Headers**
+
+| Header          | Value            | Required | Description                        |
+| --------------- | ---------------- | -------- | ---------------------------------- |
+| `Authorization` | `Bearer <token>` | Yes      | The token for user authentication. |
+
+#### **Response**
+
+**On Success**
+
+- **Status Code:** `200 OK`
+- **Response Example:**
+
+```json
+[
+  {
+    "id": 1,
+    "user": {
+      "id": 2,
+      "username": "user2",
+      "account_type": "public",
+      "first_name": "John",
+      "last_name": "Doe",
+      "total_followers": 100,
+      "total_following": 150,
+      "total_posts": 5
+    },
+    "title": "This is a liked post",
+    "body": "Content of the liked post",
+    "total_likes": 10,
+    "total_comments": 3,
+    "created_at": "2025-01-13T10:00:00Z"
+  },
+  {
+    "id": 2,
+    "user": {
+      "id": 3,
+      "username": "user3",
+      "account_type": "private",
+      "first_name": "Jane",
+      "last_name": "Smith",
+      "total_followers": 50,
+      "total_following": 75,
+      "total_posts": 3
+    },
+    "title": "This is another liked post",
+    "body": "Content of another liked post",
+    "total_likes": 5,
+    "total_comments": 1,
+    "created_at": "2025-01-12T10:00:00Z"
+  }
+]
+```
+
+**On Failure**
+
+1. User not authenticated:
+   - **Status Code:** `401 Unauthorized`
+   - **Response Example:**
+   ```json
+   {
+     "detail": "Authentication credentials were not provided."
+   }
+   ```
+
+#### **Notes**
+
+- This endpoint requires the user to be authenticated.
+- Only posts that the user has liked will be returned.
+- The response includes nested details about the user and post, such as `user`'s profile information and `post`'s like and comment counts.
