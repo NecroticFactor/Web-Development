@@ -1103,3 +1103,166 @@ Fetches the posts that have been liked by the authenticated user. The response i
 - This endpoint requires the user to be authenticated.
 - Only posts that the user has liked will be returned.
 - The response includes nested details about the user and post, such as `user`'s profile information and `post`'s like and comment counts.
+
+---
+
+---
+
+### **Replies API**
+
+#### **Endpoint**
+
+`GET /posts/{post_id}/comments/{comment_id}/replies/`
+
+#### **Description**
+
+Fetches all replies for a specific comment under a post.
+
+#### **Request Method**
+
+`GET`
+
+#### **Request Headers**
+
+| Header          | Value            | Required | Description                        |
+| --------------- | ---------------- | -------- | ---------------------------------- |
+| `Authorization` | `Bearer <token>` | Yes      | The token for user authentication. |
+
+#### **Response**
+
+**On Success**
+
+- **Status Code:** `200 OK`
+- **Response Example:**
+  ```json
+  [
+    {
+      "id": 1,
+      "content": "This is a reply to the comment.",
+      "created_at": "2025-01-12T15:34:00Z",
+      "updated_at": "2025-01-12T16:00:00Z",
+      "user": {
+        "id": 42,
+        "username": "john_doe"
+      },
+      "comments": {
+        "id": 12,
+        "content": "Original comment content"
+      }
+    }
+  ]
+  ```
+
+`POST /posts/{post_id}/comments/{comment_id}/replies/`
+
+#### **Description**
+
+Adds a new reply to a specific comment. If the post is private, the user must be a follower of the post’s owner.
+
+#### **Request Method**
+
+`POST`
+
+#### **Request Headers**
+
+| Header          | Value            | Required | Description                        |
+| --------------- | ---------------- | -------- | ---------------------------------- |
+| `Authorization` | `Bearer <token>` | Yes      | The token for user authentication. |
+
+#### **Request Body**
+
+```json
+{
+  "content": "This is a new reply."
+}
+```
+
+#### **Response**
+
+**On Success**
+
+- **Status Code:** `200 OK`
+- **Response Example:**
+
+```json
+{
+  "detail": "Reply added successfully.",
+  "total_replies": 5,
+  "reply": {
+    "id": 23,
+    "content": "This is a new reply.",
+    "created_at": "2025-01-12T18:00:00Z",
+    "updated_at": "2025-01-12T18:00:00Z",
+    "user": {
+      "id": 42,
+      "username": "john_doe"
+    },
+    "comments": {
+      "id": 12,
+      "content": "Original comment content"
+    }
+  }
+}
+```
+
+**On Failure**
+
+1. User not authenticated:
+
+- **Status Code:** `401 Unauthorized`
+- **Response Example:**
+
+```json
+{
+  "detail": "Authentication credentials were not provided."
+}
+```
+
+2. Invalid content:
+   - **Status Code:** `400 Bad Request`
+   - **Response Example:**
+
+```json
+{
+  "content": ["This field is required."]
+}
+```
+
+`DELETE /posts/{post_id}/comments/{comment_id}/replies/{reply_id}/`
+
+#### **Description**
+
+Deletes a specific reply under a comment. This action will decrement the total_replies count for the comment.
+
+#### **Request Method**
+
+`DELETE`
+
+#### **Request Headers**
+
+| Header          | Value            | Required | Description                        |
+| --------------- | ---------------- | -------- | ---------------------------------- |
+| `Authorization` | `Bearer <token>` | Yes      | The token for user authentication. |
+
+#### **Response**
+
+**On Success**
+
+- **Status Code:** `204 No Content`
+
+**On Failure**
+
+1. Reply not found:
+
+- **Status Code:** `404 Not Found`
+- **Response Example:**
+
+```json
+{
+  "detail": "Not found."
+}
+```
+
+---
+
+---
