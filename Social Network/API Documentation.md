@@ -568,7 +568,7 @@ Fetches all comments under a specific post. Comments can only be created or view
    }
    ```
 
-### **Create Comment API**
+### 1. **Create Comment API**
 
 #### **Endpoint**
 
@@ -657,7 +657,7 @@ Adds a comment to a specific post. The post must be accessible by the user (eith
    }
    ```
 
-### **Delete Comment API**
+### 2. **Delete Comment API**
 
 #### **Endpoint**
 
@@ -865,7 +865,7 @@ Fetches all likes for a specific post. Users can like a post if the post is publ
    }
    ```
 
-### **Create Like API**
+### 1. **Create Like API**
 
 #### **Endpoint**
 
@@ -945,7 +945,7 @@ Likes a specific post. The post must be public or the user must be a follower of
    }
    ```
 
-### **Delete Like API**
+### 2. **Delete Like API**
 
 #### **Endpoint**
 
@@ -1153,7 +1153,7 @@ Fetches all replies for a specific comment under a post.
   ]
   ```
 
-### **Create Reply API**
+### 1. **Create Reply API**
 
 #### **Endpoint**
 
@@ -1232,7 +1232,7 @@ Adds a new reply to a specific comment. If the post is private, the user must be
 }
 ```
 
-### **Delete Reply API**
+### 2. **Delete Reply API**
 
 #### **Endpoint**
 
@@ -1323,7 +1323,7 @@ Fetches the list of pending follow requests for the authenticated user.
 ]
 ```
 
-### **Send Request Follow API**
+### 1. **Send Request Follow API**
 
 #### **Endpoint**
 
@@ -1396,7 +1396,7 @@ Creates a follow request for a user. If the followed user’s account is public,
 }
 ```
 
-### **Accept or Reject Request API**
+### 2. **Accept or Reject Request API**
 
 #### **Endpoint**
 
@@ -1460,7 +1460,7 @@ Handles follow actions (approve or reject follow requests).
 }
 ```
 
-### **Unfollow User API**
+### 3. **Unfollow User API**
 
 #### **Endpoint**
 
@@ -1506,7 +1506,7 @@ Unfollows a user by deleting the follow relationship.
 }
 ```
 
-### **Check Request Status API**
+### 4. **Check Request Status API**
 
 #### **Endpoint**
 
