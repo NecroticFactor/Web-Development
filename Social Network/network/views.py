@@ -19,35 +19,37 @@ from .serializers import *
 
 
 def index(request):
-    return render(request, "network/index.html")
+    return render(
+        request,
+        "network/index.html",
+        {
+            "user": request.user,
+        },
+    )
 
 
 def login_view(request):
     if request.method == "POST":
-
-        # Attempt to sign user in
         username = request.POST["username"]
         password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
 
-        # Check if authentication successful
         if user is not None:
+            login(request, user)
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
             refresh_token = str(refresh)
 
+            # Return tokens in JSON response
             return JsonResponse(
                 {
-                    "access": access_token,
-                    "refresh": refresh_token,
+                    "success": True,
+                    "access_token": access_token,
+                    "refresh_token": refresh_token,
                 }
             )
         else:
-            return render(
-                request,
-                "network/login.html",
-                {"message": "Invalid username and/or password."},
-            )
+            return JsonResponse({"success": False})
     else:
         return render(request, "network/login.html")
 
