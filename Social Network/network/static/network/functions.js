@@ -1,6 +1,4 @@
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "./constants.js";
-import jwt_decode from 'jwt-decode';
-import axios from 'axios';
 
 
 // Handles Logging in and Token authentication
@@ -50,7 +48,7 @@ const api = axios.create({
 const isTokenExpired = (token) => {
     if(!token) return true;
 
-    // Decode the toke
+    // Decode the token
     const decodedToken = jwt_decode(token);
     // Get the time in milliseconds
     const currentTime = Date.now() / 1000;
