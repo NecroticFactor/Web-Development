@@ -33,3 +33,5 @@ export async function login(username, password, CSRFToken) {
         alert("An error occurred. Please try again.");
     }
 };
+
+// Helper function to intercept API to add headers
