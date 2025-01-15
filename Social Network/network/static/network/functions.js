@@ -1,3 +1,9 @@
+import { ACCESS_TOKEN, REFRESH_TOKEN } from "./constants.js";
+import axios from 'axios';
+
+
+
+
 // Handles Logging in and Token authentication
 export async function login(username, password, CSRFToken) {
     // Create a FormData object to send
@@ -35,3 +41,46 @@ export async function login(username, password, CSRFToken) {
 };
 
 // Helper function to intercept API to add headers
+const api = axios.create({
+    base_url: 'http://127.0.0.1:8000/'
+})
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem(ACCESS_TOKEN)
+        if(token) {
+            config.headers.Authorization = `Bearer ${token}`
+        }
+        return config
+    },
+    (error) => {
+        return Promise.reject(error)
+    }
+);
+
+// Check if tokens are valid, else refresh and store during API call.
+api.interceptors.response.use(
+    (response) => {
+        return response
+    },
+    async(error) => {
+        const originalRequest = error.config;
+
+        if(error.response.status === 401 && !originalRequest._retry) {
+            originalRequest._= true;
+            try{
+                const refreshToken = localStorage.get(REFRESH_TOKEN);
+                const response = await axios.post('http://127.0.0.1:8000/token/refresh/', { refresh: refreshToken });
+                const newAccessToken = response.data.access;
+                localStorage.setItem(ACCESS_TOKEN, newAccessToken);
+
+                originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`
+                return api(originalRequest);
+
+            } catch (refreshError) {
+                console.error('Token refresh failed:', refreshError);
+                return Promise.reject(refreshError);
+        } 
+    }
+    return Promise.reject(error);
+}
+);
