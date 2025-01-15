@@ -1,7 +1,6 @@
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "./constants.js";
+import jwt_decode from 'jwt-decode';
 import axios from 'axios';
-
-
 
 
 // Handles Logging in and Token authentication
@@ -40,47 +39,57 @@ export async function login(username, password, CSRFToken) {
     }
 };
 
+
+
 // Helper function to intercept API to add headers
 const api = axios.create({
     base_url: 'http://127.0.0.1:8000/'
-})
+});
+
+// Helper function check if token has expired
+const isTokenExpired = (token) => {
+    if(!token) return true;
+
+    // Decode the toke
+    const decodedToken = jwt_decode(token);
+    // Get the time in milliseconds
+    const currentTime = Date.now() / 1000;
+
+    // Compare if token time is < current time
+    return decodedToken < currentTime;
+}
+
+// Checks if token is valid, get's new token, interceptors and adds to headers
 api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem(ACCESS_TOKEN)
+    async(config) => {
+        let accessToken = localStorage.getItem(ACCESS_TOKEN);
+
+        if (isTokenExpired(accessToken)) {
+            const refreshToken = localStorage.getItem(REFRESH_TOKEN)
+            try {
+                const response = await axios.request('http://127.0.0.1:8000/token/refresh/', { refresh: refreshToken })
+                token = response.data.access;
+                localStorage.setItem(ACCESS_TOKEN, token)
+            } catch(error){
+                return Promise.reject(error);
+            }
+        }
         if(token) {
-            config.headers.Authorization = `Bearer ${token}`
+            config.headers.Authorization = `Bearer ${token}`;   
         }
         return config
     },
     (error) => {
-        return Promise.reject(error)
-    }
+        return Promise.reject(error); 
+    } 
 );
 
-// Check if tokens are valid, else refresh and store during API call.
+// Response interceptor to handle responses
 api.interceptors.response.use(
     (response) => {
-        return response
+        return response;
     },
-    async(error) => {
-        const originalRequest = error.config;
-
-        if(error.response.status === 401 && !originalRequest._retry) {
-            originalRequest._= true;
-            try{
-                const refreshToken = localStorage.get(REFRESH_TOKEN);
-                const response = await axios.post('http://127.0.0.1:8000/token/refresh/', { refresh: refreshToken });
-                const newAccessToken = response.data.access;
-                localStorage.setItem(ACCESS_TOKEN, newAccessToken);
-
-                originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`
-                return api(originalRequest);
-
-            } catch (refreshError) {
-                console.error('Token refresh failed:', refreshError);
-                return Promise.reject(refreshError);
-        } 
+    (error) => {
+        return Promise.reject(error); 
     }
-    return Promise.reject(error);
-}
 );
