@@ -82,6 +82,7 @@ Registers a new user by creating an account with a username, email, and password
 | `email`        | `string` | Yes      | The email address of the user.            |
 | `password`     | `string` | Yes      | The password for the account.             |
 | `confirmation` | `string` | Yes      | Must match the `password` field.          |
+| `account_type` | `string` | Yes      | The preffered account type from the dropdown|
 
 #### **Request Body Example**
 
@@ -90,7 +91,8 @@ Registers a new user by creating an account with a username, email, and password
   "username": "johndoe",
   "email": "johndoe@example.com",
   "password": "securepassword123",
-  "confirmation": "securepassword123"
+  "confirmation": "securepassword123",
+  "account_type": "public or private",
 }
 ```
 
@@ -260,6 +262,47 @@ Allows an authenticated user to update their username and account type. Validate
 
 ---
 
+## Endpoint: Get User Profile
+
+### URL
+`GET /profile/<str:username>/`
+
+### Description
+Fetches the profile details of a specified user by their username. If the logged-in user requests their own profile, their details are returned. Otherwise, the details of the specified user are returned.
+
+### Permissions
+- **Authenticated Users Only**: This endpoint requires the user to be logged in.
+
+### Request Parameters
+
+| Parameter  | Type   | Description                       |
+|------------|--------|-----------------------------------|
+| `username` | string | The username of the target user.  |
+
+### Response
+
+#### Success (200 OK)
+Returns the details of the user as serialized data.
+
+**Response Body Example**:
+```json
+{
+  "id": 1,
+  "username": "john_doe",
+  "email": "john.doe@example.com",
+  "first_name": "John",
+  "last_name": "Doe",
+  "account_type": "Public or 'Private",
+  "total_posts":,
+  "total_followers":,
+  "total_following":,
+  "date_joined": "2023-01-01T12:00:00Z",
+}
+```
+----
+
+----
+
 ### **Posts API**
 
 #### **Base Endpoint**
@@ -279,7 +322,8 @@ Provides CRUD operations for posts. Users can create, retrieve, update, delete, 
 
 #### **Description**
 
-Fetches posts for a specific user. If the user is private, only followers with an accepted request can view their posts. The response includes nested user and post details.
+Fetches posts for a specific user if `user_id` provided in the request body, else fetches posts of all public accounts. 
+`Applies to GET + user_id` => If the user is private, only followers with an accepted request can view their posts. The response includes nested user and post details.
 
 #### **Request Method**
 
@@ -287,9 +331,9 @@ Fetches posts for a specific user. If the user is private, only followers with a
 
 #### **Request Parameters**
 
-| Parameter | Type    | Required | Description                                       |
-| --------- | ------- | -------- | ------------------------------------------------- |
-| `user_id` | Integer | Yes      | The ID of the user whose posts are to be fetched. |
+| Parameter | Type    | Required                      | Description                                       |
+| --------- | ------- | ------------------------------| ------------------------------------------------- |
+| `user_id` | Integer | Not strict(refer description) | The ID of the user whose posts are to be fetched. |
 
 #### **Request Headers**
 
@@ -390,7 +434,8 @@ Creates a new post for the authenticated user.
 
 ```json
 {
-  "content": "This is my new post!"
+  "title": "This is the title of my new post!",
+  "body": "This is the content of my new post",
 }
 ```
 

@@ -56,13 +56,14 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return HttpResponseRedirect(reverse("index"))
+    return HttpResponseRedirect(reverse("login"))
 
 
 def register(request):
     if request.method == "POST":
         username = request.POST["username"]
         email = request.POST["email"]
+        account_type = request.POST['account_type']
 
         # Ensure password matches confirmation
         password = request.POST["password"]
@@ -75,6 +76,7 @@ def register(request):
         # Attempt to create new user
         try:
             user = User.objects.create_user(username, email, password)
+            user.account_type = account_type
             user.save()
         except IntegrityError:
             return render(
@@ -135,7 +137,7 @@ class UpdateUserView(APIView):
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
         # Ensure user is authenticated before creating a post
@@ -160,6 +162,12 @@ class PostViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         # Delete a post and decrement total posts for the user
         post_id = self.kwargs["pk"]
+        user=request.user
+        if not user:
+            return Response(
+                {"detail": "User not logged in."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         try:
             post = Post.objects.get(id=post_id, user=request.user)
         except Post.DoesNotExist:
@@ -203,6 +211,15 @@ class PostViewSet(viewsets.ModelViewSet):
 
             # Fetch posts for the specific user
             queryset = Post.objects.filter(user=user).select_related("user")
+        elif not user_id:
+            queryset = Post.objects.filter(
+            user__account_type="public"
+            ).select_related("user")
+
+            # Serialize and return the response
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+
         else:
             return Response(
                 {"detail": "Please provide a user_id to fetch posts."},

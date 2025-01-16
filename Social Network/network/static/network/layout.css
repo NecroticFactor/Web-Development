@@ -1,0 +1,49 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+  }
+  
+  /* Navbar Styles */
+  .navbar {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #922edf !important;
+  }
+  
+  .navbar-nav .nav-item .nav-link {
+    font-size: 1rem;
+    color: #555 !important;
+    transition: color 0.3s ease;
+  }
+  
+  .navbar-nav .nav-item .nav-link:hover {
+    color: #922edf !important;
+  }
+  
+  .username {
+    font-weight: bold;
+    color: #333 !important;
+  }
+  
+  /* Content Wrapper */
+  .content-wrapper {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  /* Utility Classes */
+  .text-center {
+    text-align: center;
+  }
+  
+  .text-muted {
+    color: #6c757d !important;
+  }

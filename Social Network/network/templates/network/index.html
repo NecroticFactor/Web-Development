@@ -1,1 +1,39 @@
-{% extends "network/layout.html" %} {% block body %} {% endblock %}
+{% extends "network/layout.html" %} 
+{% load static %}
+{% block body %} 
+<div class='posts-list-view'></div>
+
+<div class='posts-detailed-view'></div>
+
+<div class='posts-list-following'>
+    <h1>All Posts By Following</h1>
+</div>
+
+<div class='create-post-btn'>
+    <button></button>
+</div>
+
+<div class="create-post-overlay"></div>
+<div class="create-post-form" id="create-post-form">
+    <div>
+        <input 
+            id="post-title" 
+            type="text" 
+            name="title" 
+            placeholder="Enter your post title..." 
+            required 
+        />
+    </div>
+    <div>
+        <textarea 
+            id="post-body" 
+            name="body" 
+            placeholder="Write your post content here..." 
+            required
+        ></textarea>
+    </div>
+    <button id="submit-post">Submit Post</button>
+</div>
+<link href="{% static 'network/index.css' %}" rel="stylesheet" />
+<script type="module" src="{% static 'network/index.js' %}"></script>
+{% endblock %}
