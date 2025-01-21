@@ -1,0 +1,13 @@
+{% extends "network/layout.html" %} 
+{% load static %}
+{% block body %} 
+
+<h4> This is the profile page</h4>
+
+<div class='UserDetail'>Shows user details</div>
+
+<div class='UserPost'>Shows user posts or Private wall</div>
+
+
+<script type="module" src="{% static 'network/profile.js' %}"></script>
+{% endblock %}

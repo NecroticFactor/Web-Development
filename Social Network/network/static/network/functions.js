@@ -2,14 +2,18 @@ import { ACCESS_TOKEN, REFRESH_TOKEN } from "./constants.js";
 
 
 // Handles date formatting
-export function formattedDate(timestamp){
+export function formattedDate(timestamp) {
     dayjs.extend(window.dayjs_plugin_relativeTime);
-    const relativeTime =  dayjs(timestamp).fromNow();
-    const day = relativeTime.split('')
-    if (day[0] >= 3 ) {
-        return dayjs(timestamp).format("D MMMM YYYY")
+    const relativeTime = dayjs(timestamp).fromNow();
+    if (relativeTime.includes('hour') || relativeTime.includes('minute')) {
+        return relativeTime;
+    }
+    const daysCount = parseInt(relativeTime.split(' ')[0]);
+
+    if (daysCount >= 3) {
+        return dayjs(timestamp).format("D MMMM YYYY");
     } else {
-        return relativeTime
+        return relativeTime;
     }
 } 
 
@@ -32,7 +36,7 @@ export async function login(username, password, CSRFToken) {
         });
 
         // Parse the response as JSON
-        const data = await response.json();  // This is the missing part
+        const data = await response.json();
 
         if (data.success) {
             // If login is successful, store tokens in localStorage
@@ -64,7 +68,7 @@ const isTokenExpired = (token) => {
 
     // Decode the token
     const decodedToken = jwt_decode(token);
-    const currentTime = Date.now() / 1000; // Current time in seconds
+    const currentTime = Date.now() / 1000;
 
     // Compare the expiration time with the current time
     return decodedToken.exp < currentTime;
@@ -118,8 +122,8 @@ export async function getAllPosts() {
     }
 }
 
-// Function that fetches posts by post_id to show individual posts onClick of post list
-export async function getPostByID(id) {
+// Function that fetches posts of specific user
+export async function getUserPostByID(id) {
     try {
         const res = await api.get(`posts/`,{
             params: {user_id: id},
@@ -127,6 +131,22 @@ export async function getPostByID(id) {
         });
 
         return res.data.length > 0 ? res.data : [];
+    } catch(error) {
+        const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
+        alert(errorMessage);
+
+        console.error(`Failed to fetch posts: ${error.message}`);
+        
+        return [];
+    }
+}
+
+// Function that fetches specific post
+export async function getPostByID(id) {
+    try {
+        const res = await api.get(`posts/${id}`);
+
+        return res.data;
     } catch(error) {
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
         alert(errorMessage);
@@ -146,7 +166,7 @@ export async function sendPost(title, body) {
         });
 
         if(res.status !== 200 && res.status !== 201) {
-            console.log(`Error: ${res.data.message || 'Unexpected error occurred.'}`);
+            console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
             alert('Unexpected error occurred.')
             return null;
         }
@@ -184,6 +204,118 @@ export async function deletePost(id) {
 }
 //// ---------------------------------------------------------------------------------------------------------------------------------////
 
-//// ---------------------------------------ALL LOGICS RELATED TO COMMENTING----------------------------------------------------------////
+//// ---------------------------------------ALL LOGICS RELATED TO SPECIFIC POSTS-> COMMENTING AND LIKING----------------------------------------------------------////
 
 // Function to fetch comments related to a post
+export async function getComentsByPostID(id) {
+    try {
+        const res = await api.get(`posts/${id}/comments/`)
+
+        if(res.status !== 200) {
+            alert('Unexpected error occured.')
+            console.log(`Error: ${res.data?.message}`);
+            return false
+        }
+        return res.data
+    } catch(error){
+        alert(error)
+    }
+}
+
+
+
+// Function to create a comment
+export async function createComment(id, comment) {
+    try {
+        const res = await api.post(`posts/${id}/comments/`,{
+            comments: comment,
+        });
+
+        if(!res.status == 200 && res.status == 201){
+            console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
+            alert('Unexpected error occurred.')
+            return null;
+        }
+        return res.data
+
+    } catch(error) {
+        const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
+        alert(errorMessage);
+
+        console.error(`Failed to create comment: ${error.message}`);
+    }
+}
+
+
+
+// Function to delete a comment
+export async function deleteComment(postID,commentID){
+    try {
+        const res = await api.delete(`/posts/${postID}/comments/${commentID}/`)
+
+        if(!res.status == 204) {
+            console.log(`Error:${res.data?.message || 'Unexpected error occured.'}`)
+            alert('Unexpected error occured.')
+            return null
+        } 
+        alert('Comment deleted successfully');
+        return true;
+
+    } catch(error) {
+        const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
+        alert(errorMessage);
+
+        console.error(`Failed to delete comment: ${error.message}`);
+    }
+}
+
+
+
+// // Function to fetch the initial like status (this should be called when the post is loaded)
+// export async function fetchInitialLikeStatus(postId, likeButton) {
+//     try {
+//         const response = await api.get(`posts/${postId}/likes/like-status/`);
+//         if (response.status === 200) {
+//             updateLikeButtonState(response.data.liked, likeButton);  
+//         }
+//     } catch (error) {
+//         console.error('Error fetching initial like status:', error);
+//     }
+// }
+
+// Function to like and unlike a post  
+export async function likePost(id) {
+    try {
+        const res = await api.post(`posts/${id}/likes/`, {});
+
+        if (res.status !== 200 && res.status !== 201) {
+            console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
+            alert('Unexpected error occurred.');
+            return null;
+        }
+        return res.data;
+    } catch (error) {
+        const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
+        alert(errorMessage);
+        console.error(`Error liking post: ${error.message}`); 
+    }
+}
+
+// Function to delete/remove a like
+export async function unlikePost(id) {
+    try {
+        const res = await api.delete(`posts/${id}/likes/`);
+
+        if (res.status !== 204) {
+            console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
+            alert('Unexpected error occurred.');
+            return null;
+        } 
+        alert('Unliked post');
+        return true;
+    } catch (error) {
+        const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
+        alert(errorMessage);
+        console.error(`Failed to unlike post: ${error.message}`);
+    }
+}

@@ -1,9 +1,9 @@
 /* Posts List View Container */
 .posts-list-view {
-    max-width: 900px;
+    max-width: 1200px; 
     margin: 50px auto;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
     gap: 20px;
     padding: 20px;
 }
@@ -95,6 +95,25 @@
     color: #888;
     padding-top: 17px;
     text-align: right;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 1024px) {
+    .posts-list-view {
+        grid-template-columns: repeat(3, 1fr); /* 3 columns for medium screens */
+    }
+}
+
+@media (max-width: 768px) {
+    .posts-list-view {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns for small screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .posts-list-view {
+        grid-template-columns: 1fr; /* 1 column for very small screens */
+    }
 }
 
 /* No Posts Message */
@@ -242,3 +261,311 @@
 .create-post-overlay.show {
     display: block;
 }
+
+/* ---------------------------------- POST DETAIL VIEW STYLES ------------------------------- */
+
+/* Post Detail Container */
+.post-detail-container {
+    width: 100%;
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: 'Arial', sans-serif;
+    position: relative; /* Ensures that the delete button is positioned relative to this container */
+}
+
+/* Post Content */
+.posts-detailed-view {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Post Header */
+.post-header {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 10px;
+}
+
+.post-user span {
+    font-weight: bold;
+    color: #333;
+}
+
+.post-date {
+    color: #666;
+}
+
+/* Post Title */
+.post-title {
+    font-size: 2rem;
+    margin-top: 10px;
+    color: #333;
+    font-weight: bold;
+}
+
+/* Post Body */
+.post-body {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #555;
+    margin-top: 20px;
+}
+
+/* Delete button inside the post container with purple box */
+.delete-post-btn {
+    background-color: #922edf; 
+    border: none;
+    color: white; 
+    font-size: 1rem; 
+    cursor: pointer;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 8px 18px; /* Added padding for a better clickable area */
+    margin: 8px;
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Hover effect for delete button */
+.delete-post-btn:hover {
+    background-color: #7a2b9e; /* Darker purple on hover */
+    transform: scale(1.1); /* Slight enlarge on hover */
+}
+
+/* Active/Pressed effect */
+.delete-post-btn:active {
+    background-color: #5c1b7f; /* Even darker purple when clicked */
+    transform: scale(0.95); /* Slight shrink for click feedback */
+}
+
+/* Like Area Styling */
+.posts-like-view {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    margin-top: 20px;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    justify-content: center; /* Center align the content */
+}
+
+
+.like-icon {
+    font-size: 2rem;
+    color: #ccc; /* Default gray color */
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.like-icon.liked {
+    color: #e63946; /* Bright red when liked */
+    transform: scale(1.2); /* Slightly enlarge when liked */
+}
+
+.like-count {
+    font-size: 1.2rem;
+    color: #333;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Hover Effect */
+.like-icon:hover {
+    color: #922edf; /* Purple hover effect */
+    transform: scale(1.1); /* Slight enlargement on hover */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .like-icon {
+        font-size: 1.8rem;
+    }
+
+    .like-count {
+        font-size: 1rem;
+    }
+}
+
+/* Comments Section */
+.posts-comments-view {
+    margin-top: 30px;
+}
+
+/* Container for the comments list */
+.comments-list {
+    margin-top: 15px;
+}
+
+/* Styling for individual comment boxes */
+.comment-box {
+    background-color: #f7f7f7;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 1rem;
+    color: #444;
+    position: relative; 
+}
+
+/* Delete button inside the comment box */
+.delete-comment-btn {
+    background-color: transparent;
+    color: #ff4d4d; 
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+/* Hover effect for delete button */
+.delete-comment-btn:hover {
+    color: #ff1a1a; 
+    transform: scale(1.1); 
+}
+
+/* Active/Pressed effect */
+.delete-comment-btn:active {
+    color: #cc0000; 
+    transform: scale(0.95); 
+}
+
+/* Styling for comment text */
+.comment-box p {
+    margin: 5px 0;
+    color: #444;
+}
+
+/* Placeholder when no comments are available */
+.no-comments-message {
+    color: #888;
+    font-size: 1rem;
+    text-align: center;
+    margin-top: 15px;
+}
+
+
+/* Comment Input */
+.comment-input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'Arial', sans-serif;
+    resize: none;
+    height: 80px;
+    outline: none;
+}
+
+.comment-input:focus {
+    border-color: #922edf;
+    box-shadow: 0 0 5px rgba(146, 46, 223, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .post-detail-container {
+        padding: 15px;
+        margin: 20px auto;
+    }
+
+    .post-title {
+        font-size: 1.5rem;
+    }
+
+    .post-body {
+        font-size: 1rem;
+    }
+
+    .like-icon {
+        font-size: 1.2rem;
+    }
+
+    .like-count {
+        font-size: 0.9rem;
+    }
+
+    .comment-input {
+        height: 60px;
+    }
+}
+
+
+/* Comment Box Form */
+.posts-comment-create-form {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.comment-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.comment-box input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'Arial', sans-serif;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.comment-box input:focus {
+    border-color: #922edf;
+    box-shadow: 0 0 5px rgba(146, 46, 223, 0.3);
+}
+
+/* Add a button to submit the comment */
+.comment-box button {
+    padding: 10px 20px;
+    background-color: #922edf;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.comment-box button:hover {
+    background-color: #751bb5;
+}
+
+/* Placeholder message styling for the input field */
+.comment-box input::placeholder {
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .comment-box input {
+        font-size: 0.9rem;
+    }
+
+    .comment-box button {
+        font-size: 0.9rem;
+        padding: 8px 15px;
+    }
+}
+

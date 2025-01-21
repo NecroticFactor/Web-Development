@@ -35,6 +35,11 @@
     font-size: 1rem;
     padding: 10px;
   }
+
+  #login-input:focus {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: #922edf;
+  }
   
   .login-form .btn {
     font-size: 1rem;

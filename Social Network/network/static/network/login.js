@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", function() {
     } else {
         console.error('Login form not found');
     }
+
 });
 
 // Submit login form 

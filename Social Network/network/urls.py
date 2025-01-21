@@ -13,14 +13,16 @@ auth_patterns = [
 
 page_patterns = [
     path("", views.index, name="index"),
-    path(
-        "profile/<str:username>/",
-        views.ProfileViewPage.as_view(),
-        name="profile-page",
-    ),
+    path('profile', views.profile, name='profile'),
+
 ]
 
 single_query_patterns = [
+    path(
+        "user/<str:username>/",
+        views.UserDetails.as_view(),
+        name="profile-page",
+    ),
     path("liked-posts/", views.LikedPostsView.as_view(), name="liked-posts"),
     path(
         "commented-posts/", views.CommentedPostsView.as_view(), name="commented-posts"

@@ -265,7 +265,7 @@ Allows an authenticated user to update their username and account type. Validate
 ## Endpoint: Get User Profile
 
 ### URL
-`GET /profile/<str:username>/`
+`GET /user/<str:username>/`
 
 ### Description
 Fetches the profile details of a specified user by their username. If the logged-in user requests their own profile, their details are returned. Otherwise, the details of the specified user are returned.
@@ -318,11 +318,11 @@ Provides CRUD operations for posts. Users can create, retrieve, update, delete, 
 #### **1. List Posts**
 
 **Endpoint**
-`GET /posts/`
+`GET /posts/` or `GET posts/{id}`
 
 #### **Description**
 
-Fetches posts for a specific user if `user_id` provided in the request body, else fetches posts of all public accounts. 
+Fetches posts for a specific user if `user_id` provided in the request body, else fetches posts of a specific id if passed as `posts/{id}` else gets all posts of all public accounts. 
 `Applies to GET + user_id` => If the user is private, only followers with an accepted request can view their posts. The response includes nested user and post details.
 
 #### **Request Method**
@@ -334,6 +334,7 @@ Fetches posts for a specific user if `user_id` provided in the request body, els
 | Parameter | Type    | Required                      | Description                                       |
 | --------- | ------- | ------------------------------| ------------------------------------------------- |
 | `user_id` | Integer | Not strict(refer description) | The ID of the user whose posts are to be fetched. |
+
 
 #### **Request Headers**
 
@@ -934,7 +935,7 @@ Likes a specific post. The post must be public or the user must be a follower of
 
 | Parameter | Type    | Required | Description                         |
 | --------- | ------- | -------- | ----------------------------------- |
-| `like`    | Boolean | Yes      | Whether to like or unlike the post. |
+| `null`    | - | -      | Just send POST to like and DELETE to unlike |
 
 #### **Request Headers**
 
@@ -1555,7 +1556,7 @@ Unfollows a user by deleting the follow relationship.
 
 #### **Endpoint**
 
-`GET /follow/check-status/`
+`GET /follow/check-status/?followed_id={id}`
 
 #### **Description**
 

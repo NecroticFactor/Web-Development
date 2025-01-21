@@ -27,6 +27,14 @@ def index(request):
         },
     )
 
+def profile(request):
+    return render(
+        request,
+        "network/profile.html",
+        {
+            "user": request.user
+        },
+    )
 
 def login_view(request):
     if request.method == "POST":
@@ -137,7 +145,7 @@ class UpdateUserView(APIView):
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         # Ensure user is authenticated before creating a post
@@ -169,7 +177,8 @@ class PostViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_401_UNAUTHORIZED
             )
         try:
-            post = Post.objects.get(id=post_id, user=request.user)
+            post = Post.objects.get(id=post_id, user=user)
+            print(post)
         except Post.DoesNotExist:
             raise NotFound("Post does not exist")
 
@@ -284,6 +293,8 @@ class CommentViewSet(viewsets.ModelViewSet):
         post_id = self.kwargs["post_pk"]
         comment_id = self.kwargs["comment_id"]
 
+        
+
         post = get_object_or_404(Post, id=post_id)
         comment = get_object_or_404(Comments, post=post, id=comment_id)
 
@@ -312,7 +323,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 class LikeViewSet(viewsets.ModelViewSet):
     queryset = Likes.objects.all()
     serializer_class = LikesSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         # Return likes for a specific post
@@ -370,6 +381,28 @@ class LikeViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_204_NO_CONTENT,
         )
+    
+    @action(detail=True, methods=["get"], url_path="like-status")
+    def check_status(self, request):
+        user = request.user
+        post_id = self.kwargs['post_pk']
+
+        try:
+            like = Likes.objects.get(user=user, liked_post__id=post_id)
+            return Response(
+                {
+                    "status": "liked"
+                },
+                status=status.HTTP_200_OK
+            )
+        except Likes.DoesNotExist:
+            return Response(
+                {
+                    "status": "not liked"
+                },
+                status=status.HTTP_200_OK
+            )
+            
 
 
 class ReplyViewSet(viewsets.ModelViewSet):
@@ -643,7 +676,7 @@ class BlockViewSet(viewsets.ModelViewSet):
 
 
 # View for profile page
-class ProfileViewPage(APIView):
+class UserDetails(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
