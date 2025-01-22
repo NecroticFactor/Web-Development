@@ -271,43 +271,51 @@ export async function deleteComment(postID,commentID){
 
 
 
-// Fetch the initial like status
-export async function fetchInitialLikeStatus(postId) {
+// // Function to fetch the initial like status (this should be called when the post is loaded)
+// export async function fetchInitialLikeStatus(postId, likeButton) {
+//     try {
+//         const response = await api.get(`posts/${postId}/likes/like-status/`);
+//         if (response.status === 200) {
+//             updateLikeButtonState(response.data.liked, likeButton);  
+//         }
+//     } catch (error) {
+//         console.error('Error fetching initial like status:', error);
+//     }
+// }
+
+// Function to like and unlike a post  
+export async function likePost(id) {
     try {
-        const response = await api.get(`posts/${postId}/liked-status/`);
-        if (response.status === 200) {
-            return response.data.status === "liked";
+        const res = await api.post(`posts/${id}/likes/`, {});
+
+        if (res.status !== 200 && res.status !== 201) {
+            console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
+            alert('Unexpected error occurred.');
+            return null;
         }
+        return res.data;
     } catch (error) {
-        console.error("Error fetching initial like status:", error);
-        return false;
+        const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
+        alert(errorMessage);
+        console.error(`Error liking post: ${error.message}`); 
     }
 }
 
-
-// Handle like action
-export async function handleLike(postId) {
+// Function to delete/remove a like
+export async function unlikePost(id) {
     try {
-        const response = await api.post(`posts/${postId}/likes/`);
-        if (response.status === 200) {
-            console.log(response.data)
-            return response.data.total_likes;
-        }
-    } catch (error) {
-        console.error("Error liking the post:", error);
-        return null;
-    }
-}
+        const res = await api.delete(`posts/${id}/likes/`);
 
-// Handle unlike action
-export async function handleUnlike(postId) {
-    try {
-        const response = await api.delete(`posts/${postId}/likes/`);
-        if (response.status === 200) {
-            return response.data.total_likes;
-        }
+        if (res.status !== 204) {
+            console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
+            alert('Unexpected error occurred.');
+            return null;
+        } 
+        alert('Unliked post');
+        return true;
     } catch (error) {
-        console.error("Error unliking the post:", error);
-        return null;
+        const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
+        alert(errorMessage);
+        console.error(`Failed to unlike post: ${error.message}`);
     }
 }

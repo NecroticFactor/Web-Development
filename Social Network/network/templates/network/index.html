@@ -1,60 +1,71 @@
-{% extends "network/layout.html" %} {% load static %} {% block body %}
+{% extends "network/layout.html" %} 
+{% load static %}
+{% block body %} 
 
 <script>
-  const loggedInUser = "{{ request.user.username }}";
+    const loggedInUser = "{{ request.user.username }}"
 </script>
 
-<div class="posts-list-view"></div>
+<div class='posts-list-view'></div>
 
 <div class="post-detail-container">
-  <div class="posts-detailed-view"></div>
-
-  <div class="posts-comment-create-form">
-    <form class="comment-box" id="comment-form">
-      <input
-        id="comment"
-        type="text"
-        name="comments"
-        placeholder="Enter your comment"
-        required
-      />
-      <button id="comment-btn" type="submit">Comment</button>
-    </form>
-  </div>
-  <div class="posts-comments-view"></div>
+    <div class="posts-detailed-view"></div>
+    
+    <div class="posts-like-view">
+        <i class="fas fa-heart like-icon" id='like-btn'></i>
+        <span class="like-count" id="likeCount"></span>
+    </div>
+        
+    <div class="posts-comment-create-form">
+        <form class="comment-box">
+            <input
+                id="comment"
+                type="text"
+                name="comments"
+                placeholder="Enter your comment"
+            />
+            <button id='comment-btn' type="submit">Comment</button>
+        </form>
+    </div>
+    <div class="posts-comments-view">
+    </div>    
+    
 </div>
 
-<div class="posts-list-following" id="following-posts">
-  <h1>All Posts By Following</h1>
+<div class='posts-list-following' id='following-posts'>
+    <h1>All Posts By Following</h1>
 </div>
 
 {% if user.is_authenticated %}
-<div class="create-post-btn">
-  <button></button>
+<div class='create-post-btn'>
+    <button></button>
 </div>
+
 
 <div class="create-post-overlay"></div>
 
+
 <div class="create-post-form" id="create-post-form">
-  <div>
-    <input
-      id="post-title"
-      type="text"
-      name="title"
-      placeholder="Enter your post title..."
-      required
-    />
-  </div>
-  <div>
-    <textarea
-      id="post-body"
-      name="body"
-      placeholder="Write your post content here..."
-      required
-    ></textarea>
-  </div>
-  <button id="submit-post">Submit Post</button>
+    <div>
+        <input 
+            id="post-title" 
+            type="text" 
+            name="title" 
+            placeholder="Enter your post title..." 
+            required
+        />
+    </div>
+    <div>
+        <textarea 
+            id="post-body" 
+            name="body" 
+            placeholder="Write your post content here..." 
+            required
+        ></textarea>
+    </div>
+    <button id="submit-post">Submit Post</button>  
 </div>
+
 
 {% endif %}
 <link href="{% static 'network/index.css' %}" rel="stylesheet" />
