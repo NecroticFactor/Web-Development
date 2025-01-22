@@ -27,14 +27,14 @@ def index(request):
         },
     )
 
+
 def profile(request):
     return render(
         request,
         "network/profile.html",
-        {
-            "user": request.user
-        },
+        {"user": request.user},
     )
+
 
 def login_view(request):
     if request.method == "POST":
@@ -71,7 +71,7 @@ def register(request):
     if request.method == "POST":
         username = request.POST["username"]
         email = request.POST["email"]
-        account_type = request.POST['account_type']
+        account_type = request.POST["account_type"]
 
         # Ensure password matches confirmation
         password = request.POST["password"]
@@ -170,11 +170,10 @@ class PostViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         # Delete a post and decrement total posts for the user
         post_id = self.kwargs["pk"]
-        user=request.user
+        user = request.user
         if not user:
             return Response(
-                {"detail": "User not logged in."},
-                status=status.HTTP_401_UNAUTHORIZED
+                {"detail": "User not logged in."}, status=status.HTTP_401_UNAUTHORIZED
             )
         try:
             post = Post.objects.get(id=post_id, user=user)
@@ -221,9 +220,9 @@ class PostViewSet(viewsets.ModelViewSet):
             # Fetch posts for the specific user
             queryset = Post.objects.filter(user=user).select_related("user")
         elif not user_id:
-            queryset = Post.objects.filter(
-            user__account_type="public"
-            ).select_related("user")
+            queryset = Post.objects.filter(user__account_type="public").select_related(
+                "user"
+            )
 
             # Serialize and return the response
             serializer = self.get_serializer(queryset, many=True)
@@ -293,8 +292,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         post_id = self.kwargs["post_pk"]
         comment_id = self.kwargs["comment_id"]
 
-        
-
         post = get_object_or_404(Post, id=post_id)
         comment = get_object_or_404(Comments, post=post, id=comment_id)
 
@@ -353,16 +350,21 @@ class LikeViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
-
         post = get_object_or_404(Post, id=self.kwargs["post_pk"])
-        response.data["total_likes"] = post.total_likes
-        response.data["liked"] = True
 
-        return response
+        return Response(
+            {
+                "detail": "Like added successfully.",
+                "total_likes": post.total_likes,
+                "liked": True,
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
     def destroy(self, request, *args, **kwargs):
         # Remove like from post and decrement total likes for the post
         post_id = self.kwargs["post_pk"]
+        print(post_id)
         post = get_object_or_404(Post, id=post_id)
 
         like = get_object_or_404(Likes, user=self.request.user, post=post)
@@ -381,28 +383,6 @@ class LikeViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_204_NO_CONTENT,
         )
-    
-    @action(detail=True, methods=["get"], url_path="like-status")
-    def check_status(self, request):
-        user = request.user
-        post_id = self.kwargs['post_pk']
-
-        try:
-            like = Likes.objects.get(user=user, liked_post__id=post_id)
-            return Response(
-                {
-                    "status": "liked"
-                },
-                status=status.HTTP_200_OK
-            )
-        except Likes.DoesNotExist:
-            return Response(
-                {
-                    "status": "not liked"
-                },
-                status=status.HTTP_200_OK
-            )
-            
 
 
 class ReplyViewSet(viewsets.ModelViewSet):
@@ -704,6 +684,20 @@ class LikedPostsView(APIView):
         liked_posts = Post.objects.filter(liked_posts__user=user)
         serializer = PostSerializer(liked_posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class LikeStatus(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, post_pk):
+        user = request.user
+        post_id = post_pk
+
+        try:
+            like = Likes.objects.get(user=user, post__id=post_id)
+            return Response({"status": "liked"}, status=status.HTTP_200_OK)
+        except Likes.DoesNotExist:
+            return Response({"status": "not liked"}, status=status.HTTP_200_OK)
 
 
 # View for fetching posts commented on by the user

@@ -1,7 +1,7 @@
 import { formattedDate} from "./functions.js";
 import { getAllPosts, getUserPostByID ,getPostByID ,sendPost, deletePost} from "./functions.js";
 import { getComentsByPostID, createComment, deleteComment } from "./functions.js";
-// import { fetchInitialLikeStatus, likePost, unlikePost } from "./functions.js";
+import { fetchInitialLikeStatus, handleLike, handleUnlike } from "./functions.js";
 
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -129,14 +129,14 @@ async function getPostsAll(){
 
 
 
-// Function to get a particular post using getPostByID and its comment, like API
+// Function to fetch a particular post and its comments, likes, and other details
 async function getPostDetail(id) {
-    // Fetches the expanded view of the post form index page
     try {
+        // Fetch the expanded view of the post
         const post = await getPostByID(id);
 
         const postDetailViewContainer = document.querySelector('.posts-detailed-view');
-        postDetailViewContainer.innerHTML = ''; // Clear previous content
+        postDetailViewContainer.innerHTML = '';
 
         if (post) {
             const newDiv = document.createElement('div');
@@ -148,6 +148,10 @@ async function getPostDetail(id) {
                 </div>
                 <h2 class="post-title">${post.title}</h2>
                 <p class="post-body">${post.body}</p>
+                <div class="posts-like-view">
+                    <i class="fas fa-heart like-icon" id="like-btn" data-post-id="${post.id}"></i>
+                    <span class="like-count" id="likeCount">${post.total_likes || 0}</span>
+                </div>
             `;
 
             // Conditionally render the delete button based on user match
@@ -158,15 +162,22 @@ async function getPostDetail(id) {
                 postDeleteButton.addEventListener('click', () => removePost(post.id));
                 postDetailViewContainer.appendChild(postDeleteButton);
             }
-                postDetailViewContainer.appendChild(newDiv);
-                // initializeLikeButton(post.id)
-                document.querySelector('#comment-btn').addEventListener('click', ()=> makeComment(post.id))
+
+            postDetailViewContainer.appendChild(newDiv);
+
+            // Initialize like button functionality
+            const likeButton = document.getElementById('like-btn');
+            const totalLikesElement = document.getElementById('likeCount');
+            initializeLikeButton(likeButton, totalLikesElement);
+
+            // Attach comment button event listener
+            document.querySelector('#comment-btn').addEventListener('click', () => makeComment(post.id));
 
         } else {
             postDetailViewContainer.innerHTML = `<p class="no-posts-message">No posts found.</p>`;
         }
 
-        // Fetches all the comments for that particular post
+        // Fetch comments for the post
         try {
             const comments = await getComentsByPostID(id);
 
@@ -209,57 +220,60 @@ async function getPostDetail(id) {
             alert(`Failed to fetch comments: ${error}`);
         }
 
-
     } catch (error) {
         alert(`Failed to fetch post: ${error}`);
     }
 }
 
+// Initialize the like button functionality
+function initializeLikeButton(likeButton, totalLikesElement) {
+    const postId = likeButton.dataset.postId;
 
-// Function to update the like button state based on the like status
-// function updateLikeButtonState(liked, likeButton) {
-//     if (liked) {
-//         likeButton.classList.add('liked');
-//         likeButton.innerHTML = '<i class="fas fa-thumbs-up"></i> Liked';
-//     } else {
-//         likeButton.classList.remove('liked');
-//         likeButton.innerHTML = '<i class="fas fa-thumbs-up"></i> Like';
-//     }
-// }
+    // Update the like button state
+    function updateLikeButtonState(liked) {
+        if (liked) {
+            likeButton.classList.add('liked');
+            likeButton.classList.remove('not-liked');
+        } else {
+            likeButton.classList.add('not-liked');
+            likeButton.classList.remove('liked');
+        }
+    }
 
-// // Function to handle like/unlike button click
-// async function handleLikeButtonClick(postId, likeButton) {
-//     try {
-//         const liked = likeButton.classList.contains('liked');
+    // Update the total likes display
+    function updateTotalLikes(totalLikes) {
+        totalLikesElement.textContent = `${totalLikes}`;
+    }
 
-//         if (liked) {
-//             // Unlike the post if it's already liked
-//             const success = await unlikePost(postId);
-//             if (success) {
-//                 updateLikeButtonState(false, likeButton);  // Update the button to show "like"
-//             }
-//         } else {
-//             // Like the post if it's not already liked
-//             const response = await likePost(postId);
-//             if (response) {
-//                 updateLikeButtonState(true, likeButton);  // Update the button to show "liked"
-//             }
-//         }
-//     } catch (error) {
-//         console.error('Error handling like/unlike action:', error);
-//     }
-// }
+    // Fetch initial like status and update the button state
+    async function initializeLikeStatus() {
+        const liked = await fetchInitialLikeStatus(postId);
+        updateLikeButtonState(liked);
+    }
 
-// // Function to initialize the like button when the post is loaded
-// async function initializeLikeButton(postId) {
-//     const likeButton = document.querySelector(`#like-btn-${postId}`);
-    
-//     // Fetch the initial like status when the post is loaded
-//     await fetchInitialLikeStatus(postId, likeButton);
+    // Add event listener for like/unlike button
+    likeButton.addEventListener('click', async () => {
+        const isLiked = likeButton.classList.contains('liked');
+        if (isLiked) {
+            const totalLikes = await handleUnlike(postId);
+            if (totalLikes !== null) {
+                updateLikeButtonState(false);
+                updateTotalLikes(totalLikes);
+            }
+        } else {
+            const totalLikes = await handleLike(postId);
+            if (totalLikes !== null) {
+                updateLikeButtonState(true);
+                updateTotalLikes(totalLikes);
+            }
+        }
+    });
 
-//     // Add event listener to the like button
-//     likeButton.addEventListener('click', () => handleLikeButtonClick(postId, likeButton));
-// }
+    // Initialize like status on page load
+    initializeLikeStatus();
+}
+
+
 
 
 
