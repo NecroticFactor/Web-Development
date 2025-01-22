@@ -166,9 +166,9 @@ async function getPostDetail(id) {
             postDetailViewContainer.appendChild(newDiv);
 
             // Initialize like button functionality
-            const likeButton = document.getElementById('like-btn');
-            const totalLikesElement = document.getElementById('likeCount');
-            initializeLikeButton(likeButton, totalLikesElement);
+            // const likeButton = document.getElementById('like-btn');
+            // const totalLikesElement = document.getElementById('likeCount');
+            // initializeLikeButton(likeButton, totalLikesElement);
 
             // Attach comment button event listener
             document.querySelector('#comment-btn').addEventListener('click', () => makeComment(post.id));
@@ -225,53 +225,53 @@ async function getPostDetail(id) {
     }
 }
 
-// Initialize the like button functionality
-function initializeLikeButton(likeButton, totalLikesElement) {
-    const postId = likeButton.dataset.postId;
+// // Initialize the like button functionality
+// function initializeLikeButton(likeButton, totalLikesElement) {
+//     const postId = likeButton.dataset.postId;
 
-    // Update the like button state
-    function updateLikeButtonState(liked) {
-        if (liked) {
-            likeButton.classList.add('liked');
-            likeButton.classList.remove('not-liked');
-        } else {
-            likeButton.classList.add('not-liked');
-            likeButton.classList.remove('liked');
-        }
-    }
+//     // Update the like button state
+//     function updateLikeButtonState(liked) {
+//         if (liked) {
+//             likeButton.classList.add('liked');
+//             likeButton.classList.remove('not-liked');
+//         } else {
+//             likeButton.classList.add('not-liked');
+//             likeButton.classList.remove('liked');
+//         }
+//     }
 
-    // Update the total likes display
-    function updateTotalLikes(totalLikes) {
-        totalLikesElement.textContent = `${totalLikes}`;
-    }
+//     // Update the total likes display
+//     function updateTotalLikes(totalLikes) {
+//         totalLikesElement.textContent = `${totalLikes}`;
+//     }
 
-    // Fetch initial like status and update the button state
-    async function initializeLikeStatus() {
-        const liked = await fetchInitialLikeStatus(postId);
-        updateLikeButtonState(liked);
-    }
+//     // Fetch initial like status and update the button state
+//     async function initializeLikeStatus() {
+//         const liked = await fetchInitialLikeStatus(postId);
+//         updateLikeButtonState(liked);
+//     }
 
-    // Add event listener for like/unlike button
-    likeButton.addEventListener('click', async () => {
-        const isLiked = likeButton.classList.contains('liked');
-        if (isLiked) {
-            const totalLikes = await handleUnlike(postId);
-            if (totalLikes !== null) {
-                updateLikeButtonState(false);
-                updateTotalLikes(totalLikes);
-            }
-        } else {
-            const totalLikes = await handleLike(postId);
-            if (totalLikes !== null) {
-                updateLikeButtonState(true);
-                updateTotalLikes(totalLikes);
-            }
-        }
-    });
+//     // Add event listener for like/unlike button
+//     likeButton.addEventListener('click', async () => {
+//         const isLiked = likeButton.classList.contains('liked');
+//         if (isLiked) {
+//             const totalLikes = await handleUnlike(postId);
+//             if (totalLikes !== null) {
+//                 updateLikeButtonState(false);
+//                 updateTotalLikes(totalLikes);
+//             }
+//         } else {
+//             const totalLikes = await handleLike(postId);
+//             if (totalLikes !== null) {
+//                 updateLikeButtonState(true);
+//                 updateTotalLikes(totalLikes);
+//             }
+//         }
+//     });
 
-    // Initialize like status on page load
-    initializeLikeStatus();
-}
+//     // Initialize like status on page load
+//     initializeLikeStatus();
+// }
 
 
 
