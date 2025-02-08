@@ -78,11 +78,17 @@ const isTokenExpired = (token) => {
 api.interceptors.request.use(
     async (config) => {
         let token = localStorage.getItem(ACCESS_TOKEN);
+        
+        // If no access token, force redirect to login
+        if (!token) {
+            window.location.href = "/login";
+            return Promise.reject("No access token found, redirecting to login.");
+        }
 
         if (isTokenExpired(token)) {
             const refreshToken = localStorage.getItem(REFRESH_TOKEN);
             try {
-                const response = await axios.post('http://127.0.0.1:8000/token/refresh/', {
+                const response = await axios.post('token/refresh/', {
                     refresh: refreshToken,
                 });
                 token = response.data.access;
@@ -111,7 +117,7 @@ api.interceptors.response.use(
 // Function to fetch all posts by public accounts only
 export async function getAllPosts() {
     try {
-        const res = await api.get('posts/');
+        const res = await axios.get('posts/');
         return res.data.length > 0 ? res.data : [];
     } catch (error) {
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
@@ -148,10 +154,7 @@ export async function getPostByID(id) {
 
         return res.data;
     } catch(error) {
-        const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
-        alert(errorMessage);
-
-        console.error(`Failed to fetch posts: ${error.message}`);
+        console.error(`Failed to fetch posts: Login to view`);
         
         return [];
     }
@@ -192,6 +195,7 @@ export async function deletePost(id) {
             
         }
         alert('Post deleted successfully.');
+        window.location.href = '/';
         return true;
 
     } catch(error) {
@@ -271,17 +275,18 @@ export async function deleteComment(postID,commentID){
 
 
 
-// // Function to fetch the initial like status (this should be called when the post is loaded)
-// export async function fetchInitialLikeStatus(postId, likeButton) {
-//     try {
-//         const response = await api.get(`posts/${postId}/likes/like-status/`);
-//         if (response.status === 200) {
-//             updateLikeButtonState(response.data.liked, likeButton);  
-//         }
-//     } catch (error) {
-//         console.error('Error fetching initial like status:', error);
-//     }
-// }
+
+// Function to check like status for a user and a post
+export async function initialLikeStatus(id) {
+    try {
+        const res = await api.get(`posts/${id}/like-status/`);
+        console.log(res.data)
+        return res.data
+    } catch(error) {
+        console.log(error)
+        alert('Unexpected error occured')
+    }
+}
 
 // Function to like and unlike a post  
 export async function likePost(id) {

@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework_nested.routers import NestedDefaultRouter
 from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from . import views
 
@@ -9,6 +10,7 @@ auth_patterns = [
     path("logout/", views.logout_view, name="logout"),
     path("register/", views.register, name="register"),
     path("update_profile/", views.UpdateUserView.as_view(), name="update_profile"),
+    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 ]
 
 page_patterns = [

@@ -1,80 +1,179 @@
 import { formattedDate} from "./functions.js";
 import { getAllPosts, getUserPostByID ,getPostByID ,sendPost, deletePost} from "./functions.js";
 import { getComentsByPostID, createComment, deleteComment } from "./functions.js";
-// import { fetchInitialLikeStatus, likePost, unlikePost } from "./functions.js";
+import { initialLikeStatus, likePost, unlikePost } from "./functions.js";
 
 
 document.addEventListener("DOMContentLoaded", function() {
 
-    indexLoader()
-    document.querySelector(".create-post-btn").addEventListener('click', showPostForm)
-    if(document.querySelector("#posts-following")) {
-        document.querySelector("#posts-following").addEventListener("click", getPostsByFollowing)
-    } else {
-        return false;
+    indexLoader();
+    logoutClear();
+
+    // Check if the element exists before adding event listener
+    const postsListView = document.querySelector(".posts-list-view");
+    if (postsListView) {
+        postsListView.addEventListener('click', function() {
+            if (!authenticated){
+                window.location.href = "/register";
+            }
+        });
     }
-    document.querySelector('#submit-post').addEventListener('click', sendToPost)
-    
-    document.querySelector("#all-posts").addEventListener("click", getPostsAll)
 
+    const createPostBtn = document.querySelector(".create-post-btn");
+    if (createPostBtn) {
+        createPostBtn.addEventListener('click', showPostForm);
+    }
 
-    
+    const postsFollowing = document.querySelector("#posts-following");
+    if (postsFollowing) {
+        postsFollowing.addEventListener("click", getPostsByFollowing);
+    }
+
+    const submitPost = document.querySelector('#submit-post');
+    if (submitPost) {
+        submitPost.addEventListener('click', sendToPost);
+    }
+
+    const allPosts = document.querySelector("#all-posts");
+    if (allPosts) {
+        allPosts.addEventListener("click", getPostsAll, indexLoader);
+    }
+
 });
 
 // Loads the indexPage View
 function indexLoader() {
-    document.querySelector('.posts-list-following').style.display = 'none';
-    document.querySelector('.create-post-form').style.display = 'none';
-    document.querySelector('.create-post-overlay').style.display = 'none';
-    document.querySelector('.posts-detailed-view').style.display = 'none';
-    document.querySelector('.post-detail-container').style.display = 'none';
+    // Check if the elements exist before applying style changes
+    const postsListFollowing = document.querySelector('.posts-list-following');
+    const createPostForm = document.querySelector('.create-post-form');
+    const createPostOverlay = document.querySelector('.create-post-overlay');
+    const postsDetailedView = document.querySelector('.posts-detailed-view');
+    const postDetailContainer = document.querySelector('.post-detail-container');
+    const postsListView = document.querySelector('.posts-list-view');
+    const createPostBtn = document.querySelector('.create-post-btn');
 
-        
-    document.querySelector('.posts-list-view').style.display = 'grid';
-    document.querySelector('.create-post-btn').style.display = 'block';
+    // Hide elements by default if they exist
+    if (postsListFollowing) {
+        postsListFollowing.style.display = 'none';
+    }
+    if (createPostForm) {
+        createPostForm.style.display = 'none';
+    }
+    if (createPostOverlay) {
+        createPostOverlay.style.display = 'none';
+    }
+    if (postsDetailedView) {
+        postsDetailedView.style.display = 'none';
+    }
+    if (postDetailContainer) {
+        postDetailContainer.style.display = 'none';
+    }
 
-    
-
+    // Show elements that exist
+    if (postsListView) {
+        postsListView.style.display = 'grid';
+    }
+    if (createPostBtn) {
+        createPostBtn.style.display = 'block';
+    }
 }
 
 // Loads the Post Detail View Page
 function postDetailLoader() {
-    document.querySelector('.posts-list-following').style.display = 'none';
-    document.querySelector('.create-post-form').style.display = 'none';
-    document.querySelector('.create-post-overlay').style.display = 'none';
-    document.querySelector(".posts-list-view").style.display = 'none';
+    const postsListFollowing = document.querySelector('.posts-list-following');
+    const createPostForm = document.querySelector('.create-post-form');
+    const createPostOverlay = document.querySelector('.create-post-overlay');
+    const postsListView = document.querySelector(".posts-list-view");
+    const postsDetailedView = document.querySelector('.posts-detailed-view');
+    const postDetailContainer = document.querySelector('.post-detail-container');
 
-    document.querySelector('.posts-detailed-view').style.display = 'grid';
-    document.querySelector('.post-detail-container').style.display = 'grid';
+    if (postsListFollowing) {
+        postsListFollowing.style.display = 'none';
+    }
+    if (createPostForm) {
+        createPostForm.style.display = 'none';
+    }
+    if (createPostOverlay) {
+        createPostOverlay.style.display = 'none';
+    }
+    if (postsListView) {
+        postsListView.style.display = 'none';
+    }
 
+    if (postsDetailedView) {
+        postsDetailedView.style.display = 'grid';
+    }
+    if (postDetailContainer) {
+        postDetailContainer.style.display = 'grid';
+    }
 }
-
 
 // Loads the Post Form
 function showPostForm() {
-    //H
-    document.querySelector('.posts-list-following').style.display = 'none';
-    document.querySelector(".posts-list-view").style.display = 'none';
-    document.querySelector('.create-post-btn').style.display = 'none';
+    const postsListFollowing = document.querySelector('.posts-list-following');
+    const postsListView = document.querySelector(".posts-list-view");
+    const createPostBtn = document.querySelector('.create-post-btn');
+    const createPostForm = document.querySelector('.create-post-form');
+    const postTitle = document.querySelector("#post-title");
+    const postBody = document.querySelector('#post-body');
+
+    if (postsListFollowing) {
+        postsListFollowing.style.display = 'none';
+    }
+    if (postsListView) {
+        postsListView.style.display = 'none';
+    }
+    if (createPostBtn) {
+        createPostBtn.style.display = 'none';
+    }
 
     // Show the post form
-    document.querySelector('.create-post-form').style.display = 'grid';
+    if (createPostForm) {
+        createPostForm.style.display = 'grid';
+    }
 
-    document.querySelector("#post-title").value = '';
-    document.querySelector('#post-body').value = '';
-
-
+    // Reset form fields
+    if (postTitle) {
+        postTitle.value = '';
+    }
+    if (postBody) {
+        postBody.value = '';
+    }
 }
- 
 
 // Loads the Post By Following Page
-function getPostsByFollowing(){
-    document.querySelector('.posts-list-following').style.display = 'block';
+function getPostsByFollowing() {
+    const postsListFollowing = document.querySelector('.posts-list-following');
+    const postsListView = document.querySelector(".posts-list-view");
+    const createPostForm = document.querySelector('.create-post-form');
+    const postDetailContainer = document.querySelector('.post-detail-container');
+
+    if (postsListFollowing) {
+        postsListFollowing.style.display = 'block';
+    }
+
+    if (postsListView) {
+        postsListView.style.display = 'none';
+    }
+    if (createPostForm) {
+        createPostForm.style.display = 'none';
+    }
+    if (postDetailContainer) {
+        postDetailContainer.style.display = 'none';
+    }
+}
+
+function logoutClear() {
+    const logoutButton = document.querySelector('#logout');
     
-    document.querySelector(".posts-list-view").style.display = 'none';
-    document.querySelector('.create-post-form').style.display = 'none';
-    document.querySelector('.post-detail-container').style.display = 'none';
-    
+    if (logoutButton) {
+        logoutButton.addEventListener('click', () => {
+            localStorage.clear();
+            console.log('Local storage cleared!');
+        });
+    } else {
+        console.warn('Logout button not found!');
+    }
 }
 
 
@@ -114,6 +213,8 @@ async function getPostsAll(){
                 `;
                 newDiv.addEventListener('click', () => {
                     getPostDetail(post.id)
+                    postDetailLoader()
+                    
                 });
                 postsListViewContainer.appendChild(newDiv);
                 
@@ -131,7 +232,6 @@ async function getPostsAll(){
 
 // Function to get a particular post using getPostByID and its comment, like API
 async function getPostDetail(id) {
-    // Fetches the expanded view of the post form index page
     try {
         const post = await getPostByID(id);
 
@@ -150,117 +250,90 @@ async function getPostDetail(id) {
                 <p class="post-body">${post.body}</p>
             `;
 
-            // Conditionally render the delete button based on user match
+            // Conditionally render the delete button
             if (post.user.username === loggedInUser) {
                 const postDeleteButton = document.createElement('button');
                 postDeleteButton.classList.add('delete-post-btn');
                 postDeleteButton.innerHTML = '<i class="fas fa-trash"></i>';
-                postDeleteButton.addEventListener('click', () => removePost(post.id));
-                postDetailViewContainer.appendChild(postDeleteButton);
+                postDeleteButton.addEventListener('click', async () => {
+                    await deletePost(post.id);
+                    indexLoader(); // Redirects to index
+                });
+                newDiv.appendChild(postDeleteButton);
             }
-                postDetailViewContainer.appendChild(newDiv);
-                // initializeLikeButton(post.id)
-                document.querySelector('#comment-btn').addEventListener('click', ()=> makeComment(post.id))
+
+            postDetailViewContainer.appendChild(newDiv);
+
+            initialLikeStatus(post.id);
+            
+            // Attach event listener for adding a comment
+            const commentButton = document.querySelector('#comment-btn');
+            if (commentButton) {
+                commentButton.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    await makeComment(post.id);
+                    document.querySelector('#comment').value = '';
+                    await getComments(post.id); // Reload comments after adding
+                });
+            }
 
         } else {
             postDetailViewContainer.innerHTML = `<p class="no-posts-message">No posts found.</p>`;
         }
 
-        // Fetches all the comments for that particular post
-        try {
-            const comments = await getComentsByPostID(id);
-
-            const commentsViewContainer = document.querySelector('.posts-comments-view');
-            commentsViewContainer.innerHTML = ''; 
-
-            if (Array.isArray(comments) && comments.length > 0) {
-                const commentDiv = document.createElement('div');
-                commentDiv.classList.add('comments-list');
-                commentDiv.innerHTML = '<h5>Comments:</h5><div class="comments-list">';
-            
-                comments.forEach(comment => {
-                    const commentBox = document.createElement('div');
-                    commentBox.classList.add('comment-box');
-                    commentBox.innerHTML = `
-                        <p><strong>${comment.user.username}:</strong> ${comment.comments}</p>
-                        <div>${formattedDate(comment.created_at)}</div>
-                    `;
-            
-                    // Conditionally render the delete button for comments
-                    if (comment.user.username === loggedInUser) {
-                        const commentDeleteButton = document.createElement('button');
-                        commentDeleteButton.classList.add('delete-comment-btn');
-                        commentDeleteButton.innerHTML = '<i class="fas fa-trash"></i>';
-                        commentDeleteButton.addEventListener('click', async () => await deleteComment(post.id, comment.id));
-                        commentBox.appendChild(commentDeleteButton);
-                    }
-            
-                    commentDiv.appendChild(commentBox);
-                });
-            
-                commentsViewContainer.appendChild(commentDiv);
-            } else {
-                commentsViewContainer.innerHTML = `<p class="no-comments-message">Be the first to comment.</p>`;
-            }
-
-            postDetailLoader();
-
-        } catch (error) {
-            alert(`Failed to fetch comments: ${error}`);
-        }
-
+        // Fetch and display comments
+        await getComments(id);
 
     } catch (error) {
         alert(`Failed to fetch post: ${error}`);
     }
 }
 
+// Function to fetch and display comments
+async function getComments(postId) {
+    try {
+        const comments = await getComentsByPostID(postId);
 
-// Function to update the like button state based on the like status
-// function updateLikeButtonState(liked, likeButton) {
-//     if (liked) {
-//         likeButton.classList.add('liked');
-//         likeButton.innerHTML = '<i class="fas fa-thumbs-up"></i> Liked';
-//     } else {
-//         likeButton.classList.remove('liked');
-//         likeButton.innerHTML = '<i class="fas fa-thumbs-up"></i> Like';
-//     }
-// }
+        const commentsViewContainer = document.querySelector('.posts-comments-view');
+        commentsViewContainer.innerHTML = ''; 
 
-// // Function to handle like/unlike button click
-// async function handleLikeButtonClick(postId, likeButton) {
-//     try {
-//         const liked = likeButton.classList.contains('liked');
+        if (Array.isArray(comments) && comments.length > 0) {
+            const commentDiv = document.createElement('div');
+            commentDiv.classList.add('comments-list');
+            commentDiv.innerHTML = '<h5>Comments:</h5><div class="comments-list">';
+        
+            comments.forEach(comment => {
+                const commentBox = document.createElement('div');
+                commentBox.classList.add('comment-box');
+                commentBox.innerHTML = `
+                    <p><strong>${comment.user.username}:</strong> ${comment.comments}</p>
+                    <div>${formattedDate(comment.created_at)}</div>
+                `;
 
-//         if (liked) {
-//             // Unlike the post if it's already liked
-//             const success = await unlikePost(postId);
-//             if (success) {
-//                 updateLikeButtonState(false, likeButton);  // Update the button to show "like"
-//             }
-//         } else {
-//             // Like the post if it's not already liked
-//             const response = await likePost(postId);
-//             if (response) {
-//                 updateLikeButtonState(true, likeButton);  // Update the button to show "liked"
-//             }
-//         }
-//     } catch (error) {
-//         console.error('Error handling like/unlike action:', error);
-//     }
-// }
+                // Conditionally render the delete button for comments
+                if (comment.user.username === loggedInUser) {
+                    const commentDeleteButton = document.createElement('button');
+                    commentDeleteButton.classList.add('delete-comment-btn');
+                    commentDeleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+                    commentDeleteButton.addEventListener('click', async () => {
+                        await deleteComment(postId, comment.id);
+                        await getComments(postId); // Reload comments after deleting
+                    });
+                    commentBox.appendChild(commentDeleteButton);
+                }
 
-// // Function to initialize the like button when the post is loaded
-// async function initializeLikeButton(postId) {
-//     const likeButton = document.querySelector(`#like-btn-${postId}`);
-    
-//     // Fetch the initial like status when the post is loaded
-//     await fetchInitialLikeStatus(postId, likeButton);
+                commentDiv.appendChild(commentBox);
+            });
 
-//     // Add event listener to the like button
-//     likeButton.addEventListener('click', () => handleLikeButtonClick(postId, likeButton));
-// }
+            commentsViewContainer.appendChild(commentDiv);
+        } else {
+            commentsViewContainer.innerHTML = `<p class="no-comments-message">Be the first to comment.</p>`;
+        }
 
+    } catch (error) {
+        alert(`Failed to fetch comments: ${error}`);
+    }
+}
 
 
 
@@ -285,19 +358,6 @@ async function sendToPost(event) {
     }
 }
 
-// Function to delete post
-async function removePost(id) {
-    try{
-        await deletePost(id);
-
-        indexLoader()
-        getPostsAll()
-    } catch (error) {
-        console.error("Error deleting post:", error);
-        alert("Failed to delete the post. Please try again.");
-    }
-}
-
 
 // Function to use create comment using comment form
 async function makeComment(id){
@@ -305,15 +365,8 @@ async function makeComment(id){
     try{
         // Await the createComment function to ensure the comment is created
         await createComment(id, comment);
-
-        postDetailLoader()
-        getPostDetail(id)
     } catch (error) {
         console.error("Error submitting comment:", error);
         alert("Failed to submit the comment. Please try again.");
     }
 }
-
-
-
-// Function to delete comment using the form

@@ -145,7 +145,11 @@ class UpdateUserView(APIView):
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
+    
+    def get_permissions(self):
+        if self.action == 'list':
+            return []
+        return [IsAuthenticated()]
 
     def perform_create(self, serializer):
         # Ensure user is authenticated before creating a post
@@ -219,11 +223,11 @@ class PostViewSet(viewsets.ModelViewSet):
                     )
 
             # Fetch posts for the specific user
-            queryset = Post.objects.filter(user=user).select_related("user")
+            queryset = Post.objects.filter(user=user).order_by('-created_at').select_related("user")
         elif not user_id:
             queryset = Post.objects.filter(
             user__account_type="public"
-            ).select_related("user")
+            ).order_by('-created_at').select_related("user")
 
             # Serialize and return the response
             serializer = self.get_serializer(queryset, many=True)
@@ -237,6 +241,28 @@ class PostViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=["get"], url_path="like-status")
+    def check_status(self, request, pk=None):
+        user = request.user
+        post_id = self.kwargs['pk']
+        print(user, post_id)
+
+        try:
+            like = Likes.objects.get(user=user, post_id=post_id)
+            return Response(
+                {
+                    "liked": True
+                },
+                status=status.HTTP_200_OK
+            )
+        except Likes.DoesNotExist:
+            return Response(
+                {
+                    "liked": False
+                },
+                status=status.HTTP_200_OK
+            )
 
 
 # Handles Comments CRUD, Increment, Decrement
@@ -247,7 +273,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         post_id = self.kwargs["post_pk"]
-        return Comments.objects.filter(post=post_id).select_related("post", "user")
+        return Comments.objects.filter(post=post_id).order_by('-created_at').select_related("post", "user")
 
     def create(self, request, *args, **kwargs):
         # Save comment and increment total comments for the post
@@ -291,7 +317,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         # Delete a comment and decrement total comments for the post
         post_id = self.kwargs["post_pk"]
-        comment_id = self.kwargs["comment_id"]
+        comment_id = self.kwargs["pk"]
 
         
 
@@ -323,7 +349,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 class LikeViewSet(viewsets.ModelViewSet):
     queryset = Likes.objects.all()
     serializer_class = LikesSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         # Return likes for a specific post
@@ -381,27 +407,6 @@ class LikeViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_204_NO_CONTENT,
         )
-    
-    @action(detail=True, methods=["get"], url_path="like-status")
-    def check_status(self, request):
-        user = request.user
-        post_id = self.kwargs['post_pk']
-
-        try:
-            like = Likes.objects.get(user=user, liked_post__id=post_id)
-            return Response(
-                {
-                    "status": "liked"
-                },
-                status=status.HTTP_200_OK
-            )
-        except Likes.DoesNotExist:
-            return Response(
-                {
-                    "status": "not liked"
-                },
-                status=status.HTTP_200_OK
-            )
             
 
 
@@ -413,7 +418,7 @@ class ReplyViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # Return replies for a specific comment
         comment_id = self.kwargs["comment_pk"]
-        return Replies.objects.filter(comments=comment_id).select_related(
+        return Replies.objects.filter(comments=comment_id).order_by('-created_at').select_related(
             "comments", "user"
         )
 
@@ -488,7 +493,7 @@ class FollowViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         # Return pending follow requests for the authenticated user
-        requests = Follow.objects.filter(followed=request.user, status="pending")
+        requests = Follow.objects.filter(followed=request.user, status="pending").order_by('-created_at')
         serializer = FollowSerializer(requests, many=True)
         return Response(serializer.data)
 
@@ -599,6 +604,7 @@ class FollowViewSet(viewsets.ModelViewSet):
 class BlockViewSet(viewsets.ModelViewSet):
     queryset = Blocked.objects.all()
     serializer_class = BlockSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Blocked.objects.filter(blocker=self.request.user)
@@ -701,10 +707,9 @@ class LikedPostsView(APIView):
 
     def get(self, request, *args, **kwargs):
         user = request.user
-        liked_posts = Post.objects.filter(liked_posts__user=user)
+        liked_posts = Post.objects.filter(liked_posts__user=user).order_by('-created_at')
         serializer = PostSerializer(liked_posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 # View for fetching posts commented on by the user
 class CommentedPostsView(APIView):
@@ -712,7 +717,7 @@ class CommentedPostsView(APIView):
 
     def get(self, request, *args, **kwargs):
         user = request.user
-        commented_posts = Post.objects.filter(commented_post__user=user)
+        commented_posts = Post.objects.filter(commented_post__user=user).order_by('-created_at')
         serializer = PostSerializer(commented_posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
