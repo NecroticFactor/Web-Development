@@ -81,20 +81,31 @@ api.interceptors.request.use(
         
         // If no access token, force redirect to login
         if (!token) {
-            window.location.href = "/login";
+            redirectToLogin();
             return Promise.reject("No access token found, redirecting to login.");
         }
 
         if (isTokenExpired(token)) {
             const refreshToken = localStorage.getItem(REFRESH_TOKEN);
+            
+            if (!refreshToken) {
+                redirectToLogin();
+                return Promise.reject("No refresh token found, redirecting to login.");
+            }
+
             try {
-                const response = await axios.post('token/refresh/', {
+                const response = await axios.post("/api/token/refresh/", {
                     refresh: refreshToken,
                 });
+
+                // Update access token
                 token = response.data.access;
                 localStorage.setItem(ACCESS_TOKEN, token);
             } catch (error) {
-                return Promise.reject(error);
+                // Refresh token is expired or invalid then Force logout
+                console.error("Refresh token expired. Logging out...");
+                window.location.href = "/logout";
+                return Promise.reject("Refresh token expired, redirecting to login.");
             }
         }
 
@@ -111,6 +122,13 @@ api.interceptors.response.use(
     (response) => response,
     (error) => Promise.reject(error)
 );
+
+// Function to handle logout and redirect
+function redirectToLogin() {
+    localStorage.removeItem(ACCESS_TOKEN);
+    localStorage.removeItem(REFRESH_TOKEN);
+    window.location.href = "/login";
+}
 
 ///-------------------------------------------ALL LOGICS RELATED TO POSTS-----------------------------------////
 
@@ -280,7 +298,6 @@ export async function deleteComment(postID,commentID){
 export async function initialLikeStatus(id) {
     try {
         const res = await api.get(`posts/${id}/like-status/`);
-        console.log(res.data)
         return res.data
     } catch(error) {
         console.log(error)
@@ -289,16 +306,20 @@ export async function initialLikeStatus(id) {
 }
 
 // Function to like and unlike a post  
-export async function likePost(id) {
+export async function likePost(id, likeButton) {
     try {
         const res = await api.post(`posts/${id}/likes/`, {});
+        
 
         if (res.status !== 200 && res.status !== 201) {
             console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
             alert('Unexpected error occurred.');
             return null;
         }
+        // Apply 'liked' class
+        likeButton.classList.add('liked');
         return res.data;
+        
     } catch (error) {
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
         alert(errorMessage);
@@ -307,17 +328,20 @@ export async function likePost(id) {
 }
 
 // Function to delete/remove a like
-export async function unlikePost(id) {
+export async function unlikePost(post_id, like_id, likeButton) {
     try {
-        const res = await api.delete(`posts/${id}/likes/`);
+        const res = await api.delete(`posts/${post_id}/likes/${like_id}/`, {});
+        
 
         if (res.status !== 204) {
             console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
             alert('Unexpected error occurred.');
             return null;
         } 
-        alert('Unliked post');
+        // Remove 'liked' class
+        likeButton.classList.remove('liked'); 
         return true;
+
     } catch (error) {
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
         alert(errorMessage);

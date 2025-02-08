@@ -246,20 +246,22 @@ class PostViewSet(viewsets.ModelViewSet):
     def check_status(self, request, pk=None):
         user = request.user
         post_id = self.kwargs['pk']
-        print(user, post_id)
 
         try:
             like = Likes.objects.get(user=user, post_id=post_id)
             return Response(
                 {
-                    "liked": True
+                    "liked": True,
+                    "like_id": like.id,
+        
                 },
                 status=status.HTTP_200_OK
             )
         except Likes.DoesNotExist:
             return Response(
                 {
-                    "liked": False
+                    "liked": False,
+                    "like_id": None,
                 },
                 status=status.HTTP_200_OK
             )
@@ -392,6 +394,9 @@ class LikeViewSet(viewsets.ModelViewSet):
         post = get_object_or_404(Post, id=post_id)
 
         like = get_object_or_404(Likes, user=self.request.user, post=post)
+
+        if not like:
+            return Response({"detail": "Like does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
         with transaction.atomic():
             like.delete()

@@ -1,3 +1,25 @@
-.venv
+# Ignore system folder
 .DS_Store
+
+# Ignore environment files
 .env
+
+# Ignore SQLite database
+db.sqlite3
+
+# Ignore compiled Python files
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore virtual environments
+venv/
+.venv/
+
+# Ignore IDE/editor settings
+.vscode/
+.idea/
+*.swp
+
+# Ignore log files
+*.log

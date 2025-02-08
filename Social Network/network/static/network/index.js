@@ -165,11 +165,14 @@ function getPostsByFollowing() {
 
 function logoutClear() {
     const logoutButton = document.querySelector('#logout');
+
+    if (window.location.pathname === "/logout" || window.location.pathname === "/login") {
+        localStorage.clear();
+    }
     
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {
             localStorage.clear();
-            console.log('Local storage cleared!');
         });
     } else {
         console.warn('Logout button not found!');
@@ -212,8 +215,13 @@ async function getPostsAll(){
                     </div>
                 `;
                 newDiv.addEventListener('click', () => {
-                    getPostDetail(post.id)
-                    postDetailLoader()
+                    if(authenticated === 'False'){
+                        window.location.href = "/login";
+                    } else {
+                        getPostDetail(post.id)
+                        postDetailLoader()
+                    }
+                    
                     
                 });
                 postsListViewContainer.appendChild(newDiv);
@@ -264,7 +272,9 @@ async function getPostDetail(id) {
 
             postDetailViewContainer.appendChild(newDiv);
 
-            initialLikeStatus(post.id);
+            // Get the like status of the post for the user and pass it 
+            const likeStatus = await initialLikeStatus(post.id);
+            likeButtonToggle(likeStatus.liked, likeStatus.like_id ,post.id);
             
             // Attach event listener for adding a comment
             const commentButton = document.querySelector('#comment-btn');
@@ -288,6 +298,32 @@ async function getPostDetail(id) {
         alert(`Failed to fetch post: ${error}`);
     }
 }
+
+
+// Function to toggle like button
+async function likeButtonToggle(status, like_id, post_id) {
+    const likeButton = document.querySelector('#like-icon');
+    if (status === true) {
+        // Apply 'liked' class
+        likeButton.classList.add('liked'); 
+    } else {
+        // Remove 'liked' class
+        likeButton.classList.remove('liked'); 
+    }
+    likeButton.onclick = async () => { 
+        if (status === false) {
+            // Call like function
+            await likePost(post_id, likeButton);
+        } else {
+            // Call unlike function
+            await unlikePost(post_id, like_id, likeButton);
+        }
+        // Re-fetch the like status and update the button
+        const likeStatus = await initialLikeStatus(post_id);
+        likeButtonToggle(likeStatus.liked, likeStatus.like_id, post_id);
+    };
+}
+
 
 // Function to fetch and display comments
 async function getComments(postId) {
