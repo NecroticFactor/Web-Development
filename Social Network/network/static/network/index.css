@@ -1,5 +1,5 @@
 /* Posts List View Container */
-.posts-list-view {
+.posts-list-view, .posts-list-following {
     max-width: 1200px; 
     margin: 50px auto;
     display: grid;

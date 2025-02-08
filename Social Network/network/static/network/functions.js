@@ -165,6 +165,25 @@ export async function getUserPostByID(id) {
     }
 }
 
+// Function to get following user's posts
+export async function getPostsByFollowed(){
+    try{
+        const res = await api.get(`following-posts/`)
+        
+        if(res.status !== 200 && res.status !== 201){
+            console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
+            alert('Unexpected error occurred.')
+        }
+        return res.data
+    } catch(error){
+        const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
+        alert(errorMessage);
+
+        console.error(`Failed to fetch posts: ${error.message}`);
+    }
+
+}
+
 // Function that fetches specific post
 export async function getPostByID(id) {
     try {

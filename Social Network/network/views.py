@@ -202,6 +202,7 @@ class PostViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         # Fetch posts based on query parameters
         user_id = request.query_params.get("user_id")
+        print(user_id)
 
         if user_id:
             try:
@@ -736,7 +737,7 @@ class FollowingPostsView(APIView):
         following_users = Follow.objects.filter(
             follower=user, status="accepted"
         ).values_list("followed", flat=True)
-        posts_by_following = Post.objects.filter(user__id__in=following_users)
+        posts_by_following = Post.objects.filter(user__id__in=following_users).order_by('-created_at')
         serializer = PostSerializer(posts_by_following, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

@@ -1,5 +1,5 @@
 import { formattedDate} from "./functions.js";
-import { getAllPosts, getUserPostByID ,getPostByID ,sendPost, deletePost} from "./functions.js";
+import { getAllPosts, getUserPostByID ,getPostsByFollowed, getPostByID ,sendPost, deletePost} from "./functions.js";
 import { getComentsByPostID, createComment, deleteComment } from "./functions.js";
 import { initialLikeStatus, likePost, unlikePost } from "./functions.js";
 
@@ -9,15 +9,6 @@ document.addEventListener("DOMContentLoaded", function() {
     indexLoader();
     logoutClear();
 
-    // Check if the element exists before adding event listener
-    const postsListView = document.querySelector(".posts-list-view");
-    if (postsListView) {
-        postsListView.addEventListener('click', function() {
-            if (!authenticated){
-                window.location.href = "/register";
-            }
-        });
-    }
 
     const createPostBtn = document.querySelector(".create-post-btn");
     if (createPostBtn) {
@@ -26,17 +17,23 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const postsFollowing = document.querySelector("#posts-following");
     if (postsFollowing) {
-        postsFollowing.addEventListener("click", getPostsByFollowing);
+        postsFollowing.addEventListener("click", () => {
+            followedUserPosts();
+            getPostsByFollowingView();
+        });
+    }
+
+    const allPosts = document.querySelector("#all-posts");
+    if (allPosts) {
+        allPosts.addEventListener("click", () => {
+            getPostsAll();
+            indexLoader();
+        });
     }
 
     const submitPost = document.querySelector('#submit-post');
     if (submitPost) {
         submitPost.addEventListener('click', sendToPost);
-    }
-
-    const allPosts = document.querySelector("#all-posts");
-    if (allPosts) {
-        allPosts.addEventListener("click", getPostsAll, indexLoader);
     }
 
 });
@@ -142,14 +139,14 @@ function showPostForm() {
 }
 
 // Loads the Post By Following Page
-function getPostsByFollowing() {
+function getPostsByFollowingView() {
     const postsListFollowing = document.querySelector('.posts-list-following');
     const postsListView = document.querySelector(".posts-list-view");
     const createPostForm = document.querySelector('.create-post-form');
     const postDetailContainer = document.querySelector('.post-detail-container');
 
     if (postsListFollowing) {
-        postsListFollowing.style.display = 'block';
+        postsListFollowing.style.display = 'grid';
     }
 
     if (postsListView) {
@@ -180,61 +177,73 @@ function logoutClear() {
 }
 
 
-// Get public posts and render
-async function getPostsAll(){
-        try {
-        const posts = await getAllPosts();
-        const postsListViewContainer = document.querySelector('.posts-list-view');
-        postsListViewContainer.innerHTML = '';
+// Generic function to render posts
+function renderPosts(posts, container, emptyMessage) {
+    const postsListViewContainer = document.querySelector(container);
+    postsListViewContainer.innerHTML = '';
 
-        if (Array.isArray(posts) && posts.length > 0) {
-            posts.forEach(post => {
+    if (Array.isArray(posts) && posts.length > 0) {
+        posts.forEach(post => {
+            // Truncate the body if > 100 chars
+            let truncatedBody = post.body.length > 100 ? post.body.substring(0, 100) + '<span>....</span>' : post.body;
 
-                // Truncate the body if > 150 char
-                let truncatedBody = post.body;
-                if(post.body.length > 100) {
-                    truncatedBody = post.body.substring(0,100) + '<span>....</span>';
+            const newDiv = document.createElement('div');
+            newDiv.className = 'post-card';
+            newDiv.innerHTML = `
+                <div class="post-header">
+                    <h3 class="post-title">${post.title}</h3>
+                    <p class="post-user">By: <strong>${post.user.username}</strong></p>
+                </div>
+                <div class="post-body">
+                    <p>${truncatedBody}</p>
+                </div>
+                <div class="post-footer">
+                    <div class="post-meta">
+                        <span><i class="fas fa-heart"></i> ${post.total_likes}</span>
+                        <span><i class="fas fa-comment-dots"></i> ${post.total_comments}</span>
+                    </div>
+                    <p class="post-date">${formattedDate(post.created_at)}</p>
+                </div>
+            `;
+
+            newDiv.addEventListener('click', () => {
+                if (authenticated === 'False') {
+                    window.location.href = "/login";
+                } else {
+                    getPostDetail(post.id);
+                    postDetailLoader();
                 }
-                const newDiv = document.createElement('div');
-                // Add class for styling
-                newDiv.className = 'post-card'; 
-                newDiv.innerHTML = `
-                    <div class="post-header">
-                        <h3 class="post-title">${post.title}</h3>
-                        <p class="post-user">By: <strong>${post.user.username}</strong></p>
-                    </div>
-                    <div class="post-body">
-                        <p>${truncatedBody}</p>
-                    </div>
-                    <div class="post-footer">
-                        <div class="post-meta">
-                            <span><i class="fas fa-heart"></i> ${post.total_likes}</span>
-                            <span><i class="fas fa-comment-dots"></i> ${post.total_comments}</span>
-                        </div>
-                        <p class="post-date">${formattedDate(post.created_at)}</p>
-                    </div>
-                `;
-                newDiv.addEventListener('click', () => {
-                    if(authenticated === 'False'){
-                        window.location.href = "/login";
-                    } else {
-                        getPostDetail(post.id)
-                        postDetailLoader()
-                    }
-                    
-                    
-                });
-                postsListViewContainer.appendChild(newDiv);
-                
             });
-        } else {
-            postsListViewContainer.innerHTML = '<p class="no-posts-message">No posts found.</p>';
-        } 
-    } catch(error) {
-            alert(error)
-        }
-    } 
-    getPostsAll();
+
+            postsListViewContainer.appendChild(newDiv);
+        });
+    } else {
+        postsListViewContainer.innerHTML = `<p class="no-posts-message">${emptyMessage}</p>`;
+    }
+}
+
+// Get public posts
+async function getPostsAll() {
+    try {
+        const posts = await getAllPosts();
+        renderPosts(posts, '.posts-list-view', 'No posts found.');
+    } catch (error) {
+        alert(error);
+    }
+}
+getPostsAll();
+
+// Get posts by following
+async function followedUserPosts() {
+    try {
+        const posts = await getPostsByFollowed();
+        renderPosts(posts, '.posts-list-following' ,'No posts found. You are not following any user.');
+    } catch (error) {
+        alert(error);
+    }
+}
+
+
 
 
 
