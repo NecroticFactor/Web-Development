@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 });
 
-
+// Loads the profile view page completely
 function profileLoader() {
     const postForm = document.querySelector('.create-post-form');
     const username = document.querySelector('.nav-link.username strong')?.textContent.trim();
@@ -33,18 +33,31 @@ function attachBioEditHandler() {
 
     // Click to edit bio
     bioText.addEventListener("click", function () {
+        // Get the exisitng bio text to auto populate
         bioInput.value = bioText.innerText.trim();
+        // Hide the bio element
         bioText.classList.add("hidden");
+        // Show the edit box
         bioInput.classList.remove("hidden");
+        // Show the save button
         saveButton.classList.remove("hidden");
+        // Autofocus
         bioInput.focus();
     });
 
+    const bioError = document.getElementById("bio-error");
     // Save bio on button click
     saveButton.addEventListener("click", async function () {
+        // Get the bio from the textarea
         const newBio = bioInput.value.trim();
+        // Handle empty value
         if (!newBio) return;
 
+        // Check bio length limit
+        if (newBio.length > 100) {
+            alert("Bio should be less than 100 characters")
+            return;
+        } 
         try {
             await updateProfile({ bio: newBio });
 
@@ -128,8 +141,8 @@ function renderUserDetails(details) {
                 <div class="profile-name">
                     <h3>${details.first_name} ${details.last_name}</h3>
                 </div>
-                <div id="bio-container">
-                    <p id="bio-text" class="profile-bio">${details?.details?.bio || 'Click to add a bio'}</p>
+                <div id="bio-container"> 
+                    <p id="bio-text" class="profile-bio">${details?.bio || 'Click to add a bio'}</p>
                     <textarea id="bio-input" class="hidden"></textarea>
                     <button id="save-bio" class="hidden">Save</button>
                 </div>
