@@ -1,4 +1,3 @@
-/* General Styles */
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
@@ -6,7 +5,6 @@ body {
     background-color: #f8f9fa;
   }
   
-  /* Navbar Styles */
   .navbar {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
@@ -22,6 +20,26 @@ body {
     color: #555 !important;
     transition: color 0.3s ease;
   }
+
+   
+  .nav-item a.material-icons {
+    font-size: 24px; 
+    color: #555; 
+    margin-right: 10px; 
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-item a.material-icons:hover {
+    color: #922edf; 
+    text-decoration: none;
+  }
+
+  .navbar-nav {
+    display: flex;
+    align-items: center;
+  }
   
   .navbar-nav .nav-item .nav-link:hover {
     color: #922edf !important;
@@ -32,14 +50,12 @@ body {
     color: #333 !important;
   }
   
-  /* Content Wrapper */
   .content-wrapper {
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
   }
   
-  /* Utility Classes */
   .text-center {
     text-align: center;
   }

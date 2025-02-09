@@ -23,7 +23,6 @@ export async function login(username, password, CSRFToken) {
     const formData = new FormData();
     formData.append("username", username);
     formData.append("password", password);
-    console.log(username,password)
 
     try {
         // Send the data to the server using fetch
@@ -201,7 +200,7 @@ export async function getPostByID(id) {
 export async function sendPost(title, body) {
     try {
         const res = await api.post('posts/',{
-                title:title,
+                title: title,
                 body: body,
         });
 
@@ -248,7 +247,7 @@ export async function deletePost(id) {
 //// ---------------------------------------ALL LOGICS RELATED TO SPECIFIC POSTS-> COMMENTING AND LIKING----------------------------------------------------------////
 
 // Function to fetch comments related to a post
-export async function getComentsByPostID(id) {
+export async function getCommentsByPostID(id) {
     try {
         const res = await api.get(`posts/${id}/comments/`)
 
@@ -324,7 +323,7 @@ export async function initialLikeStatus(id) {
     }
 }
 
-// Function to like and unlike a post  
+// Function to like a post  
 export async function likePost(id, likeButton) {
     try {
         const res = await api.post(`posts/${id}/likes/`, {});
@@ -365,5 +364,82 @@ export async function unlikePost(post_id, like_id, likeButton) {
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
         alert(errorMessage);
         console.error(`Failed to unlike post: ${error.message}`);
+    }
+}
+
+
+//// ---------------------------------------ALL LOGICS RELATED PROFILE PAGE----------------------------------------------------------////
+
+// get the user details
+export async function getUserDetails(username){
+    try {
+        const res = await api.get(`user/${username}`)
+
+        if(res.status !== 200 && res.status !== 201){
+            console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
+            alert('Unexpected error occurred.');
+        } 
+        return res.data
+    } catch (error) {
+        const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
+        alert(errorMessage)
+        console.log(`Failed to fetch user details: ${error.message}`)
+    }
+}
+
+// get the profiles the user is following
+export async function getFollowing(){
+    try{
+        const res = await api.get(`following/`)
+
+        if(res.status !== 200 && res.status !== 201){
+            console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
+            alert('Unexpected error occurred.');
+        }
+        console.log(res.data)
+        return res.data;
+    } catch(error){
+        const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
+        alert(errorMessage)
+        console.log(`Failed to fetch user details: ${error.message}`)
+    }
+}
+
+// get the profiles of the followers of the user
+export async function getFollowers(){
+    try{
+        const res = await api.get(`followers/`)
+
+        if(res.status !== 200 && res.status !== 201){
+            console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
+            alert('Unexpected error occurred.');
+        }
+        console.log(res.data)
+        return res.data;
+    } catch(error){
+        const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
+        alert(errorMessage)
+        console.log(`Failed to fetch user details: ${error.message}`)
+    }
+}
+
+// Update user profile
+export async function updateProfile({username = null, account_type = null , bio = null} = {}){
+    try{
+        const res = await api.patch(`update_profile/`,{
+            username: username,
+            account_type: account_type,
+            bio: bio,
+        });
+        if(res.status !== 200 && res.status !== 201){
+            console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
+            alert('Unexpected error occurred.');
+        }
+        return res.data
+    }catch(error){
+        const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
+        alert(errorMessage);
+        console.error(`Failed to update profile: ${errorMessage}`);
+        return null;
     }
 }

@@ -36,6 +36,15 @@ def profile(request):
         },
     )
 
+def notifications(request):
+    return render(
+        request,
+        "network/notifications.html",
+        {
+            "user": request.user
+        },
+    )
+
 def login_view(request):
     if request.method == "POST":
         username = request.POST["username"]
@@ -70,6 +79,8 @@ def logout_view(request):
 def register(request):
     if request.method == "POST":
         username = request.POST["username"]
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
         email = request.POST["email"]
         account_type = request.POST['account_type']
 
@@ -84,6 +95,8 @@ def register(request):
         # Attempt to create new user
         try:
             user = User.objects.create_user(username, email, password)
+            user.first_name = first_name
+            user.last_name = last_name
             user.account_type = account_type
             user.save()
         except IntegrityError:
@@ -96,46 +109,55 @@ def register(request):
         return render(request, "network/register.html")
 
 
-# Update User Profile
 class UpdateUserView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def put(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         user = request.user
         data = request.data
 
-        # Validate account type
-        username = data.get("username", user.username)
-        account_type = data.get("account_type", user.account_type)
+        # Cannot be an empty string when updating
+        username = data.get("username")  
+        account_type = data.get("account_type")  
 
-        valid_account_types = [choice[0] for choice in User.ACCOUNT_TYPE_CHOICES]
-        if account_type not in valid_account_types:
-            raise ValidationError(
-                {
-                    "account_type": f"Invalid account type. Allowed values are: {valid_account_types}"
-                }
-            )
+        # Explicitly allow null/empty bio
+        bio = data.get("bio")  
 
-        # Check if no changes were made
-        if username == user.username and account_type == user.account_type:
-            return Response(
-                {"detail": "No changes detected."},
-                status=status.HTTP_304_NOT_MODIFIED,
-            )
 
-        try:
-            user.username = username
-            user.account_type = account_type
-            user.save()
-        except IntegrityError:
-            return Response(
-                {"detail": "Username already taken."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        # Validate and update username if provided
+        if username is not None:  
+            # Prevent blank usernames
+            if username == "":  
+                return Response({"username": "Username cannot be empty."}, status=status.HTTP_400_BAD_REQUEST)
+            user.username = username  
 
-        return Response(
-            {"detail": "User updated successfully."}, status=status.HTTP_200_OK
-        )
+        # Validate and update account_type if provided
+        if account_type is not None:
+            valid_account_types = [choice[0] for choice in User.ACCOUNT_TYPE_CHOICES]
+            if account_type not in valid_account_types:
+                return Response(
+                    {"account_type": f"Invalid account type. Allowed values: {valid_account_types}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            user.account_type = account_type  
+
+        # Only save User model if at least one field was updated
+        if username is not None or account_type is not None:
+            try:
+                user.save()
+            except IntegrityError:
+                return Response(
+                    {"detail": "Username already taken."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # Update or create UserBio only if 'bio' is explicitly provided
+        if "bio" in data:  
+            user_bio, _ = UserBio.objects.get_or_create(user=user)
+            user_bio.bio = bio  # Allow empty string
+            user_bio.save()
+
+        return Response({"detail": "User updated successfully."}, status=status.HTTP_200_OK)
 
 
 # ----------------------------VIEWS FOR API QUERIES------------------------------------#

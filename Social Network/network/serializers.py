@@ -3,6 +3,8 @@ from .models import *
 
 
 class UserSerializer(serializers.ModelSerializer):
+    bio = serializers.CharField(source="user_bio.bio", required=False, allow_blank=True)
+
     class Meta:
         model = User
         fields = [
@@ -14,8 +16,8 @@ class UserSerializer(serializers.ModelSerializer):
             "total_followers",
             "total_following",
             "total_posts",
+            "bio", 
         ]
-
 
 class PostSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)

@@ -15,6 +15,14 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+class UserBio(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_bio')
+    bio = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s Bio"
+
 
 class Post(models.Model):
     title = models.CharField(max_length=50)

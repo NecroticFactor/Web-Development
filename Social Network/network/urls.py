@@ -16,6 +16,7 @@ auth_patterns = [
 page_patterns = [
     path("", views.index, name="index"),
     path('profile', views.profile, name='profile'),
+    path('notifications', views.notifications, name='notifications'),
 
 ]
 

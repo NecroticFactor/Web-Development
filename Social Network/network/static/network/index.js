@@ -1,44 +1,59 @@
 import { formattedDate} from "./functions.js";
-import { getAllPosts, getUserPostByID ,getPostsByFollowed, getPostByID ,sendPost, deletePost} from "./functions.js";
-import { getComentsByPostID, createComment, deleteComment } from "./functions.js";
+import { getAllPosts, getPostsByFollowed, getPostByID ,sendPost, deletePost} from "./functions.js";
+import { getCommentsByPostID, createComment, deleteComment } from "./functions.js";
 import { initialLikeStatus, likePost, unlikePost } from "./functions.js";
 
-
+// Wait for the DOM to load completely
 document.addEventListener("DOMContentLoaded", function() {
 
+    // Loads the index page hiding other elements
     indexLoader();
+    // Calls the logout clearing function
     logoutClear();
 
-
+    // Gets the create post button to display post form
     const createPostBtn = document.querySelector(".create-post-btn");
     if (createPostBtn) {
         createPostBtn.addEventListener('click', showPostForm);
     }
 
+    // Add event listener to following section
     const postsFollowing = document.querySelector("#posts-following");
     if (postsFollowing) {
         postsFollowing.addEventListener("click", () => {
+            // call the function to fetch posts by following
             followedUserPosts();
+            // call the function to load the view 
             getPostsByFollowingView();
         });
     }
 
+    // add event listener to all posts section
     const allPosts = document.querySelector("#all-posts");
     if (allPosts) {
         allPosts.addEventListener("click", () => {
+            // call the function to fetch all the posts
             getPostsAll();
+            // call the function to dispaly the view of the index page
             indexLoader();
         });
     }
 
+    // add event listener to the submit button to save a post
     const submitPost = document.querySelector('#submit-post');
     if (submitPost) {
-        submitPost.addEventListener('click', sendToPost);
+        submitPost.addEventListener('click',() =>{
+            const title = document.querySelector("#post-title").value.trim();
+            const body = document.querySelector('#post-body').value.trim();
+            // call the function to send the post
+            sendToPost(title,body)
+        });
     }
 
 });
 
-// Loads the indexPage View
+
+// Loads the indexPage/All posts View
 function indexLoader() {
     // Check if the elements exist before applying style changes
     const postsListFollowing = document.querySelector('.posts-list-following');
@@ -66,7 +81,7 @@ function indexLoader() {
         postDetailContainer.style.display = 'none';
     }
 
-    // Show elements that exist
+    // Show elements needed in this page
     if (postsListView) {
         postsListView.style.display = 'grid';
     }
@@ -75,12 +90,15 @@ function indexLoader() {
     }
 }
 
-// Loads the Post Detail View Page
-function postDetailLoader() {
+
+
+// Loads the Post Detail View Page on clicking on a post either on index or profile
+export function postDetailLoader() {
     const postsListFollowing = document.querySelector('.posts-list-following');
     const createPostForm = document.querySelector('.create-post-form');
     const createPostOverlay = document.querySelector('.create-post-overlay');
     const postsListView = document.querySelector(".posts-list-view");
+    const userPostsListView = document.querySelector(".User-Post-View");
     const postsDetailedView = document.querySelector('.posts-detailed-view');
     const postDetailContainer = document.querySelector('.post-detail-container');
 
@@ -96,7 +114,10 @@ function postDetailLoader() {
     if (postsListView) {
         postsListView.style.display = 'none';
     }
-
+    if(userPostsListView){
+        userPostsListView.style.display = 'none';
+    }
+    // show the elements that are needed in this page
     if (postsDetailedView) {
         postsDetailedView.style.display = 'grid';
     }
@@ -105,10 +126,11 @@ function postDetailLoader() {
     }
 }
 
-// Loads the Post Form
-function showPostForm() {
+// Loads the Post Form either from index or profile
+export function showPostForm() {
     const postsListFollowing = document.querySelector('.posts-list-following');
     const postsListView = document.querySelector(".posts-list-view");
+    const userPostsListView = document.querySelector(".User-Post-View");
     const createPostBtn = document.querySelector('.create-post-btn');
     const createPostForm = document.querySelector('.create-post-form');
     const postTitle = document.querySelector("#post-title");
@@ -120,10 +142,12 @@ function showPostForm() {
     if (postsListView) {
         postsListView.style.display = 'none';
     }
+    if(userPostsListView){
+        userPostsListView.style.display = 'none';
+    }
     if (createPostBtn) {
         createPostBtn.style.display = 'none';
     }
-
     // Show the post form
     if (createPostForm) {
         createPostForm.style.display = 'grid';
@@ -138,7 +162,8 @@ function showPostForm() {
     }
 }
 
-// Loads the Post By Following Page
+
+// Loads the Post By Following Page on clicking Following
 function getPostsByFollowingView() {
     const postsListFollowing = document.querySelector('.posts-list-following');
     const postsListView = document.querySelector(".posts-list-view");
@@ -160,6 +185,8 @@ function getPostsByFollowingView() {
     }
 }
 
+
+// Handles localstorage on logout
 function logoutClear() {
     const logoutButton = document.querySelector('#logout');
 
@@ -172,16 +199,24 @@ function logoutClear() {
             localStorage.clear();
         });
     } else {
-        console.warn('Logout button not found!');
+        null;
     }
 }
 
 
-// Generic function to render posts
-function renderPosts(posts, container, emptyMessage) {
+// Generic function to render posts in index page and following page
+export function renderPosts(posts, container, emptyMessage) {
     const postsListViewContainer = document.querySelector(container);
+
+    // Prevent TypeError if the container does not exist
+    if (!postsListViewContainer) {
+        return;
+    }
+
+
     postsListViewContainer.innerHTML = '';
 
+    // take the post object and iterate over and fill the element
     if (Array.isArray(posts) && posts.length > 0) {
         posts.forEach(post => {
             // Truncate the body if > 100 chars
@@ -206,11 +241,15 @@ function renderPosts(posts, container, emptyMessage) {
                 </div>
             `;
 
+            // add event listener to the enitre div to go to detailed view on click
             newDiv.addEventListener('click', () => {
+                // go to login if viewing in signed out view
                 if (authenticated === 'False') {
                     window.location.href = "/login";
                 } else {
+                    // call the function to see post in detail
                     getPostDetail(post.id);
+                    // call the function to show the view
                     postDetailLoader();
                 }
             });
@@ -248,12 +287,17 @@ async function followedUserPosts() {
 
 
 // Function to get a particular post using getPostByID and its comment, like API
-async function getPostDetail(id) {
+export async function getPostDetail(id) {
     try {
         const post = await getPostByID(id);
 
         const postDetailViewContainer = document.querySelector('.posts-detailed-view');
-        postDetailViewContainer.innerHTML = ''; // Clear previous content
+
+        // Prevent TypeError if the container does not exist
+        if (!postDetailViewContainer) {
+            return;
+        }
+        postDetailViewContainer.innerHTML = '';
 
         if (post) {
             const newDiv = document.createElement('div');
@@ -274,7 +318,8 @@ async function getPostDetail(id) {
                 postDeleteButton.innerHTML = '<i class="fas fa-trash"></i>';
                 postDeleteButton.addEventListener('click', async () => {
                     await deletePost(post.id);
-                    indexLoader(); // Redirects to index
+                    // relaod the page after deleting the post
+                    window.location.reload(); 
                 });
                 newDiv.appendChild(postDeleteButton);
             }
@@ -337,9 +382,15 @@ async function likeButtonToggle(status, like_id, post_id) {
 // Function to fetch and display comments
 async function getComments(postId) {
     try {
-        const comments = await getComentsByPostID(postId);
+        const comments = await getCommentsByPostID(postId);
 
         const commentsViewContainer = document.querySelector('.posts-comments-view');
+
+        // Prevent TypeError if the container does not exist
+        if (!commentsViewContainer) {
+            return;
+        }
+
         commentsViewContainer.innerHTML = ''; 
 
         if (Array.isArray(comments) && comments.length > 0) {
@@ -361,8 +412,10 @@ async function getComments(postId) {
                     commentDeleteButton.classList.add('delete-comment-btn');
                     commentDeleteButton.innerHTML = '<i class="fas fa-trash"></i>';
                     commentDeleteButton.addEventListener('click', async () => {
+                        // call the delete function
                         await deleteComment(postId, comment.id);
-                        await getComments(postId); // Reload comments after deleting
+                        // Reload comments after deleting
+                        await getComments(postId); 
                     });
                     commentBox.appendChild(commentDeleteButton);
                 }
@@ -381,11 +434,8 @@ async function getComments(postId) {
 }
 
 
-
 // Function that uses sendPost function to create a post
-async function sendToPost(event) {
-    const title = document.querySelector("#post-title").value.trim();
-    const body = document.querySelector('#post-body').value.trim();
+export async function sendToPost(title, body, event) {
     if(!title || !body ) {
         return;
     }
@@ -394,8 +444,8 @@ async function sendToPost(event) {
         // Await the sendPost function to ensure the post is submitted
         await sendPost(title, body);
 
-        // Reload the index and fetch updated posts
-        indexLoader();
+        // Reload the page from where the post was sent
+        window.location.reload();
         await getPostsAll();
     } catch (error) {
         console.error("Error submitting post:", error);

@@ -26,12 +26,13 @@
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/relativeTime.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   </head>
 
   <body>
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="">Network</a>
+      <a class="navbar-brand" href="{% url 'index' %}">Network</a>
       <button
         class="navbar-toggler"
         type="button"
@@ -44,20 +45,25 @@
         <span class="navbar-toggler-icon"></span>
       </button>
 
+      <!-- Search Bar -->
       <div class="mx-auto d-none d-lg-block" id="search-container">
         <input 
           type="text" 
           id="search-input" 
-          placeholder="=> here..." 
-          autocomplete="off" 
+          placeholder="Search Network" 
+          autocomplete="on" 
         />
         <div id="search-results"></div>
       </div>
+    
     
       
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto">
           {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="material-icons" href="{% url 'notifications' %}">notifications</a>
+          </li>
           <li class="nav-item">
             <a class="nav-link username" href="{% url 'profile' %}"><strong>{{ user.username }}</strong></a>
           </li>

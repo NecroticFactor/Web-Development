@@ -1,7 +1,13 @@
 from django.contrib import admin
+from django.contrib.auth import get_user_model
 from .admin_filters import *
 from .models import *
 
+User = get_user_model()
+
+class UserBioInline(admin.StackedInline):
+    model = UserBio
+    extra = 1 
 
 class UserAdmin(admin.ModelAdmin):
     list_display = (
@@ -34,6 +40,7 @@ class UserAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = ("last_login", "date_joined")
+    inlines = [UserBioInline]
 
 
 class PostAdmin(admin.ModelAdmin):
