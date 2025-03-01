@@ -232,12 +232,41 @@
     }
 }
 
-/* No Posts Message */
-.no-posts-message {
-    font-size: 1rem;
-    color: #666;
+/* Private Account Message */
+.private-account-message {
     text-align: center;
-    margin-top: 20px;
+    padding: 50px;
+    font-size: 1.2rem;
+    color: #777;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: 50px auto;
+}
+
+.private-account-message i {
+    font-size: 3rem;
+    color: #922edf;
+    margin-bottom: 10px;
+}
+
+/* No Posts Yet Message (for public/accepted) */
+.no-posts-message {
+    font-size: 1.2rem;
+    color: #777;
+    text-align: center;
+    margin-top: 50px;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.no-posts-message i {
+    font-size: 3rem;
+    color: #922edf;
 }
 
 

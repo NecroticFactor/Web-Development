@@ -21,10 +21,11 @@ page_patterns = [
 ]
 
 single_query_patterns = [
+    path("search/user/", views.UserSearchView.as_view(), name='user-search'),
     path(
         "user/<str:username>/",
         views.UserDetails.as_view(),
-        name="profile-page",
+        name="user-details",
     ),
     path("liked-posts/", views.LikedPostsView.as_view(), name="liked-posts"),
     path(

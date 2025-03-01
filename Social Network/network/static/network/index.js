@@ -3,6 +3,7 @@ import { getAllPosts, getPostsByFollowed, getPostByID ,sendPost, deletePost} fro
 import { getCommentsByPostID, createComment, deleteComment } from "./functions.js";
 import { initialLikeStatus, likePost, unlikePost } from "./functions.js";
 
+
 // Wait for the DOM to load completely
 document.addEventListener("DOMContentLoaded", function() {
 

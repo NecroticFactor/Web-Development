@@ -1,4 +1,5 @@
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "./constants.js";
+import { showToast } from "./toast.js"
 
 
 // Handles date formatting
@@ -46,11 +47,11 @@ export async function login(username, password, CSRFToken) {
             window.location.href = "/";
         } else {
             // If login fails, show an error message
-            alert("Invalid username or password.");
+            showToast("Invalid username or password.", 'error');
         }
     } catch (error) {
         console.error("Error during login:", error);
-        alert("An error occurred. Please try again.");
+        showToast("An error occurred. Please try again.", 'error');
     }
 }
 
@@ -102,7 +103,6 @@ api.interceptors.request.use(
                 localStorage.setItem(ACCESS_TOKEN, token);
             } catch (error) {
                 // Refresh token is expired or invalid then Force logout
-                console.error("Refresh token expired. Logging out...");
                 window.location.href = "/logout";
                 return Promise.reject("Refresh token expired, redirecting to login.");
             }
@@ -138,7 +138,7 @@ export async function getAllPosts() {
         return res.data.length > 0 ? res.data : [];
     } catch (error) {
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
-        alert(errorMessage);
+        showToast(errorMessage, 'error');
 
         console.error(`Failed to fetch posts: ${error.message}`);
         return [];
@@ -156,7 +156,7 @@ export async function getUserPostByID(id) {
         return res.data.length > 0 ? res.data : [];
     } catch(error) {
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
-        alert(errorMessage);
+        showToast(errorMessage, 'error');
 
         console.error(`Failed to fetch posts: ${error.message}`);
         
@@ -171,12 +171,12 @@ export async function getPostsByFollowed(){
         
         if(res.status !== 200 && res.status !== 201){
             console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
-            alert('Unexpected error occurred.')
+            showToast('Unexpected error occurred.', 'error')
         }
         return res.data
     } catch(error){
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
-        alert(errorMessage);
+        showToast(errorMessage,'error');
 
         console.error(`Failed to fetch posts: ${error.message}`);
     }
@@ -206,14 +206,14 @@ export async function sendPost(title, body) {
 
         if(res.status !== 200 && res.status !== 201) {
             console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
-            alert('Unexpected error occurred.')
+            showToast('Unexpected error occurred.', 'error')
             return null;
         }
         return res.data
 
     } catch(error) {
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
-        alert(errorMessage);
+        showToast(errorMessage, 'error');
 
         console.error(`Failed to fetch posts: ${error.message}`);
     }
@@ -225,18 +225,18 @@ export async function deletePost(id) {
         const res = await api.delete(`posts/${id}/`)
 
         if(res.status !== 204) {
-            alert('Unexpected error occurred.')
+            showToast('Unexpected error occurred.', 'error')
             console.log(`Error: ${res.data?.message}`);
             return false
             
         }
-        alert('Post deleted successfully.');
+        showToast('Post deleted successfully.', 'success');
         window.location.href = '/';
         return true;
 
     } catch(error) {
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
-        alert(errorMessage);
+        showToast(errorMessage, 'error');
 
         console.error(`Failed to fetch posts: ${error.message}`);
         return false
@@ -252,13 +252,13 @@ export async function getCommentsByPostID(id) {
         const res = await api.get(`posts/${id}/comments/`)
 
         if(res.status !== 200) {
-            alert('Unexpected error occured.')
+            showToast('Unexpected error occured.', 'error')
             console.log(`Error: ${res.data?.message}`);
             return false
         }
         return res.data
     } catch(error){
-        alert(error)
+        showToast(error, 'error')
     }
 }
 
@@ -273,14 +273,14 @@ export async function createComment(id, comment) {
 
         if(!res.status == 200 && res.status == 201){
             console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
-            alert('Unexpected error occurred.')
+            showToast('Unexpected error occurred.', 'error')
             return null;
         }
         return res.data
 
     } catch(error) {
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
-        alert(errorMessage);
+        showToast(errorMessage, 'error');
 
         console.error(`Failed to create comment: ${error.message}`);
     }
@@ -295,15 +295,15 @@ export async function deleteComment(postID,commentID){
 
         if(!res.status == 204) {
             console.log(`Error:${res.data?.message || 'Unexpected error occured.'}`)
-            alert('Unexpected error occured.')
+            showToast('Unexpected error occured.', 'error')
             return null
         } 
-        alert('Comment deleted successfully');
+        showToast('Comment deleted successfully', 'success');
         return true;
 
     } catch(error) {
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
-        alert(errorMessage);
+        showToast(errorMessage, 'error');
 
         console.error(`Failed to delete comment: ${error.message}`);
     }
@@ -319,7 +319,7 @@ export async function initialLikeStatus(id) {
         return res.data
     } catch(error) {
         console.log(error)
-        alert('Unexpected error occured')
+        showToast('Unexpected error occured', 'error')
     }
 }
 
@@ -331,7 +331,7 @@ export async function likePost(id, likeButton) {
 
         if (res.status !== 200 && res.status !== 201) {
             console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
-            alert('Unexpected error occurred.');
+            showToast('Unexpected error occurred.', 'error');
             return null;
         }
         // Apply 'liked' class
@@ -340,7 +340,7 @@ export async function likePost(id, likeButton) {
         
     } catch (error) {
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
-        alert(errorMessage);
+        showToast(errorMessage, 'error');
         console.error(`Error liking post: ${error.message}`); 
     }
 }
@@ -353,7 +353,7 @@ export async function unlikePost(post_id, like_id, likeButton) {
 
         if (res.status !== 204) {
             console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
-            alert('Unexpected error occurred.');
+            showToast('Unexpected error occurred.', 'error');
             return null;
         } 
         // Remove 'liked' class
@@ -362,7 +362,7 @@ export async function unlikePost(post_id, like_id, likeButton) {
 
     } catch (error) {
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
-        alert(errorMessage);
+        showToast(errorMessage, 'error');
         console.error(`Failed to unlike post: ${error.message}`);
     }
 }
@@ -377,13 +377,36 @@ export async function getUserDetails(username){
 
         if(res.status !== 200 && res.status !== 201){
             console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
-            alert('Unexpected error occurred.');
+            showToast('Unexpected error occurred.', 'error');
         } 
         return res.data
     } catch (error) {
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
-        alert(errorMessage)
+        showToast(errorMessage, 'error')
         console.log(`Failed to fetch user details: ${error.message}`)
+    }
+}
+
+// Get follow status for logged in user and account user
+export async function checkStatus(id){
+    try{
+        const res = await api.get('follow/check-status/',{
+            params: {
+                followed_id:id
+            }
+        });
+        // Handle non-success status codes
+        if (res.status >= 400) {
+            console.error(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
+            showToast('Unexpected error occurred.', 'error');
+            return null;
+        }
+        return res.data;
+
+    }catch(error){
+        console.error(error);
+            showToast('Unexpected error occurred.', 'error');
+            return null;
     }
 }
 
@@ -394,13 +417,13 @@ export async function getFollowing(){
 
         if(res.status !== 200 && res.status !== 201){
             console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
-            alert('Unexpected error occurred.');
+            showToast('Unexpected error occurred.', 'error');
         }
         console.log(res.data)
         return res.data;
     } catch(error){
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
-        alert(errorMessage)
+        showToast(errorMessage, 'error')
         console.log(`Failed to fetch user details: ${error.message}`)
     }
 }
@@ -412,13 +435,13 @@ export async function getFollowers(){
 
         if(res.status !== 200 && res.status !== 201){
             console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
-            alert('Unexpected error occurred.');
+            showToast('Unexpected error occurred.', 'error');
         }
         console.log(res.data)
         return res.data;
     } catch(error){
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
-        alert(errorMessage)
+        showToast(errorMessage, 'error')
         console.log(`Failed to fetch user details: ${error.message}`)
     }
 }
@@ -433,12 +456,73 @@ export async function updateProfile({username = null, account_type = null , bio 
         });
         if(res.status !== 200 && res.status !== 201){
             console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
-            alert('Unexpected error occurred.');
+            showToast('Unexpected error occurred.', 'error');
         }
         return res.data
     }catch(error){
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
-        alert(errorMessage);
+        showToast(errorMessage, 'error');
+        console.error(`Failed to update profile: ${errorMessage}`);
+        return null;
+    }
+}
+
+// Search user from search bar
+export async function searchUser(searchQuery) {
+    try {
+        const res = await api.get('search/user/', {
+            params: { username: searchQuery }
+        });
+
+        // Handle non-success status codes
+        if (res.status >= 400) {
+            console.error(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
+            showToast('Unexpected error occurred.', 'error');
+            return null;
+        }
+
+        return res.data;
+    } catch (error) {
+        return null;
+    }
+}
+
+//---------------------------------------------FOLLOW LOGICS----------------------------------------//
+export async function followUser(id){
+    try{
+        const res = await api.post(`follow/`,{
+            followed_id:id
+        });
+        // Handle non-success status codes
+        if (res.status >= 400) {
+            console.error(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
+            showToast('Unexpected error occurred.', 'error');
+            return null;
+        }
+        console.log(res.data)
+        return(res.data)
+    } catch(error){
+        const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
+        showToast(errorMessage, 'error');
+        console.error(`Failed to update profile: ${errorMessage}`);
+        return null;
+    }
+}
+
+export async function unfollowUser(id){
+    try{
+        const res = await api.delete(`follow/${id}/`);
+        // Handle non-success status codes
+        if (res.status >= 400) {
+            console.error(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
+            showToast('Unexpected error occurred.', 'error');
+            return null;
+        }
+        console.log(res.data)
+        return(res.data)
+    } catch(error){
+        const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
+        showToast(errorMessage, 'error');
         console.error(`Failed to update profile: ${errorMessage}`);
         return null;
     }

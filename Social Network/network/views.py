@@ -204,7 +204,6 @@ class PostViewSet(viewsets.ModelViewSet):
             )
         try:
             post = Post.objects.get(id=post_id, user=user)
-            print(post)
         except Post.DoesNotExist:
             raise NotFound("Post does not exist")
 
@@ -224,7 +223,6 @@ class PostViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         # Fetch posts based on query parameters
         user_id = request.query_params.get("user_id")
-        print(user_id)
 
         if user_id:
             try:
@@ -535,31 +533,39 @@ class FollowViewSet(viewsets.ModelViewSet):
         if request.user == followed:
             return Response({"error": "You cannot follow yourself."}, status=400)
 
+        # Get or create the Follow object
         follow, created = Follow.objects.get_or_create(
             follower=request.user, followed=followed
         )
 
+        # Handle creation logic
         if created:
+            # For public account, once request is sent, 
+            # it is accepted hence increment following and followers
             if followed.account_type == "public":
                 follow.status = "accepted"
+                with transaction.atomic():
+                    follow.save()
+                    user = request.user
+                    followed_user = followed
+                    # Increment followers of user the request was sent to
+                    followed_user.total_followers += 1
+                    # Increment the following of the logged in user
+                    user.total_following += 1
+                    user.save()
+                    followed_user.save()
             else:
                 follow.status = "pending"
             follow.save()
             return Response(
-                (
-                    {"success": "Followed User."}
-                    if followed.account_type == "public"
-                    else {"success": "Follow request sent."}
-                ),
+                {"success": "Followed User."} if followed.account_type == "public" else {"success": "Follow request sent."},
                 status=201,
             )
         elif follow.status == "pending":
-            return Response({"info": "Follow request already sent."}, status=200)
+            return Response({"info": "Follow request already sent."}, status=409)  # 409 Conflict
         else:
-            return Response(
-                {"info": "You are already following this user."}, status=200
-            )
-
+            return Response({"info": "You are already following this user."}, status=200)
+            
     def update(self, request, pk=None, *args, **kwargs):
         # Handle follow actions (approve, reject)
         follow = get_object_or_404(Follow, id=pk, followed=request.user)
@@ -572,13 +578,17 @@ class FollowViewSet(viewsets.ModelViewSet):
 
         action = serializer.validated_data["status"]
 
+        # If request is accepted then it means the follower count goes up in accepted account 
+        # and following goes up in sent account
         if action == "accept" and follow.status == "pending":
             # Accept the follow request
             follow.status = "accepted"
 
             with transaction.atomic():
                 follow.save()
+                # Increment followers in logged-in user(request accepting user)
                 user.total_followers += 1
+                # Increment following in accoiunt the request was sent from
                 followed_user.total_following += 1
                 user.save()
                 followed_user.save()
@@ -594,27 +604,32 @@ class FollowViewSet(viewsets.ModelViewSet):
             return Response(
                 {"info": "Action already performed or invalid."}, status=200
             )
-
+    
     def destroy(self, request, pk=None, *args, **kwargs):
-        # Unfollow the user (delete the follow relationship)
-        follow = get_object_or_404(Follow, id=pk, follower=request.user)
-
-        followed_user = follow.followed
-        user = request.user
+        # Get the followed user using pk from URL
+        followed_user = get_object_or_404(User, id=pk)  # `pk` is the followed user's ID in the URL
+        
+        # Get the follow object
+        follow = get_object_or_404(Follow, follower=request.user, followed=followed_user)
 
         with transaction.atomic():
             # Delete the follow relationship
             follow.delete()
-            user.total_following = max(0, user.total_following - 1)
+
+            # Update the user's total_following and the followed user's total_followers
+            request.user.total_following = max(0, request.user.total_following - 1)
             followed_user.total_followers = max(0, followed_user.total_followers - 1)
-            user.save()
+
+            # Save the updated user data
+            request.user.save()
             followed_user.save()
 
-        return Response({"success": "Unfollowed User."}, status=200)
+        return Response({"success": "Unfollowed user successfully."}, status=200)
 
     @action(detail=False, methods=["get"], url_path="check-status")
     def check_status(self, request):
         followed_id = request.query_params.get("followed_id")
+        
 
         if not followed_id:
             raise ValidationError("'followed_id' is required.")
@@ -625,7 +640,7 @@ class FollowViewSet(viewsets.ModelViewSet):
 
         if follow:
             return Response({"status": follow.status}, status=200)
-        return Response({"status": "none"}, status=404)
+        return Response({"status": 'not followed'}, status=200)
 
 
 # Blocked View to handle blocking and unblocking
@@ -709,7 +724,7 @@ class BlockViewSet(viewsets.ModelViewSet):
 # # ----------------------SPECIAL VIEWS FOR SPECIAL QUERIES---------------------------------# #
 
 
-# View for profile page
+# View for getting user details to display in the profile page
 class UserDetails(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -793,3 +808,23 @@ class FollowerUserView(APIView):
         )
         serializer = UserSerializer(followers, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# View to search based on search bar query
+class UserSearchView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        query_name = request.query_params.get('username', '').strip()
+
+        if not query_name:
+            return Response({"error": "Username query is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Use case-insensitive search with partial matching
+        users = User.objects.filter(username__istartswith=query_name)
+
+        if users.exists():
+            serializer = UserSerializer(users, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        return Response({"message": "No users found"}, status=status.HTTP_404_NOT_FOUND)

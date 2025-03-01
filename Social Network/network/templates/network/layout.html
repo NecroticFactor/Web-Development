@@ -19,6 +19,12 @@
     <link href="{% static 'network/layout.css' %}" rel="stylesheet" />
     <link href="{% static 'network/register.css' %}" rel="stylesheet" />
     <link href="{% static 'network/searchBar.css' %}" rel="stylesheet" />
+
+    <!--Custom JS files-->
+    <script type="module" src="{% static 'network/toast.js' %}"></script>
+    <script type="module" src="{% static 'network/searchBar.js' %}"></script>
+
+    
     
     <!-- JavaScript Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
@@ -46,6 +52,7 @@
       </button>
 
       <!-- Search Bar -->
+      {% if user.is_authenticated %}
       <div class="mx-auto d-none d-lg-block" id="search-container">
         <input 
           type="text" 
@@ -55,6 +62,7 @@
         />
         <div id="search-results"></div>
       </div>
+      {% endif %}
     
     
       
@@ -89,6 +97,9 @@
         </ul>
       </div>
     </nav>
+    
+    <!--Toast for alerts-->
+    <div id="toast-container"></div>
 
     <!-- Main Content -->
     <div class="content-wrapper">
