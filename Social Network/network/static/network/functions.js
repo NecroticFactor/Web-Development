@@ -219,6 +219,29 @@ export async function sendPost(title, body) {
     }
 }
 
+// Function that updates the post
+export async function updatePost(id,title, body) {
+    try {
+        const res = await api.patch(`posts/${id}/`,{
+                title: title,
+                body: body,
+        });
+
+        if(res.status !== 200 && res.status !== 201) {
+            console.log(`Error: ${res.data?.message || 'Unexpected error occurred.'}`);
+            showToast('Unexpected error occurred.', 'error')
+            return null;
+        }
+        return res.data
+
+    } catch(error) {
+        const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
+        showToast(errorMessage, 'error');
+
+        console.error(`Failed to fetch posts: ${error.message}`);
+    }
+}
+
 // Function that deletes the post
 export async function deletePost(id) {
     try {
@@ -499,7 +522,6 @@ export async function followUser(id){
             showToast('Unexpected error occurred.', 'error');
             return null;
         }
-        console.log(res.data)
         return(res.data)
     } catch(error){
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';
@@ -518,7 +540,6 @@ export async function unfollowUser(id){
             showToast('Unexpected error occurred.', 'error');
             return null;
         }
-        console.log(res.data)
         return(res.data)
     } catch(error){
         const errorMessage = error.response?.data?.detail || 'An unexpected error occurred.';

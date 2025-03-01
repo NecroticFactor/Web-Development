@@ -100,19 +100,19 @@
 /* Media Queries for Responsiveness */
 @media (max-width: 1024px) {
     .posts-list-view {
-        grid-template-columns: repeat(3, 1fr); /* 3 columns for medium screens */
+        grid-template-columns: repeat(3, 1fr); 
     }
 }
 
 @media (max-width: 768px) {
     .posts-list-view {
-        grid-template-columns: repeat(2, 1fr); /* 2 columns for small screens */
+        grid-template-columns: repeat(2, 1fr); 
     }
 }
 
 @media (max-width: 480px) {
     .posts-list-view {
-        grid-template-columns: 1fr; /* 1 column for very small screens */
+        grid-template-columns: 1fr; 
     }
 }
 
@@ -204,14 +204,14 @@
 /* Textarea Styles (Body) */
 #create-post-form textarea {
     width: 100%;
-    height: 300px; /* Increased height for body */
+    height: 300px; 
     padding: 15px;
     margin-bottom: 15px;
     border: 1px solid #ddd;
     border-radius: 8px;
     font-size: 1rem;
     font-family: 'Arial', sans-serif;
-    resize: none; /* Prevent resizing of textarea */
+    resize: none; 
 }
 
 #create-post-form input:focus,
@@ -251,9 +251,9 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); /* Darker overlay for emphasis */
+    background-color: rgba(0, 0, 0, 0.7); 
     z-index: 999;
-    display: none; /* Hidden by default */
+    display: none; 
 }
 
 /* Show the form and overlay */
@@ -274,7 +274,6 @@
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     font-family: 'Arial', sans-serif;
-    position: relative; /* Ensures that the delete button is positioned relative to this container */
 }
 
 /* Post Content */
@@ -317,33 +316,137 @@
     margin-top: 20px;
 }
 
-/* Delete button inside the post container with purple box */
+/* Post Actions (Edit & Delete Button Container) */
+.post-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* Common styles for both buttons */
+.edit-post-btn, 
 .delete-post-btn {
+    background-color: #922edf; 
+    border: none;
+    color: white; 
+    cursor: pointer;
+    border-radius: 12px; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+
+   
+    width: 60px;  
+    height: 50px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0; 
+}
+
+/* Ensure icons inside buttons are the same size */
+.edit-post-btn i,
+.delete-post-btn i {
+    font-size: 22px; 
+    line-height: 1;
+}
+
+
+.edit-post-btn img, 
+.delete-post-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+
+.edit-post-btn svg,
+.delete-post-btn svg {
+    width: 24px;  
+    height: 24px;
+}
+
+/* Ensure icon alignment */
+.edit-post-btn i,
+.delete-post-btn i {
+    font-size: 1.2rem;
+}
+
+.edit-post-btn:hover, 
+.delete-post-btn:hover {
+    background-color: #7a2b9e;
+    transform: scale(1.1);
+}
+
+.edit-post-btn:active, 
+.delete-post-btn:active {
+    background-color: #5c1b7f;
+    transform: scale(0.95);
+}
+
+/* ---------------------------------- POST DETAIL VIEW STYLES (FOR EDIT) ------------------------------- */
+
+/* Container for edit mode */
+.edit-post-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Title and Body Edit Inputs */
+.edit-title-input {
+    width: 100%;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 8px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+    transition: border 0.3s ease-in-out;
+}
+
+.edit-body-textarea {
+    width: 100%;
+    font-size: 16px;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    min-height: 80px;
+    outline: none;
+    resize: vertical;
+    transition: border 0.3s ease-in-out;
+}
+
+/* Edit & Save Button Wrapper */
+.edit-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Edit & Save Buttons */
+.edit-post-btn, 
+.save-post-btn {
     background-color: #922edf; 
     border: none;
     color: white; 
     font-size: 1rem; 
     cursor: pointer;
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    padding: 8px 18px; /* Added padding for a better clickable area */
-    margin: 8px;
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    margin-top: 5px;
+    padding: 8px 18px;
+    border-radius: 8px; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-/* Hover effect for delete button */
-.delete-post-btn:hover {
-    background-color: #7a2b9e; /* Darker purple on hover */
-    transform: scale(1.1); /* Slight enlarge on hover */
+.edit-post-btn:hover, 
+.save-post-btn:hover {
+    background-color: #7a2b9e;
+    transform: scale(1.1);
 }
 
-/* Active/Pressed effect */
-.delete-post-btn:active {
-    background-color: #5c1b7f; /* Even darker purple when clicked */
-    transform: scale(0.95); /* Slight shrink for click feedback */
+.edit-post-btn:active, 
+.save-post-btn:active {
+    background-color: #5c1b7f;
+    transform: scale(0.95);
 }
 
 /* Like Area Styling */
@@ -351,25 +454,25 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 15px;
+    padding: 15px 20px;
     margin-top: 20px;
     background-color: #f9f9f9;
     border-radius: 12px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    justify-content: center; /* Center align the content */
+    justify-content: center;
 }
 
 
 .like-icon {
     font-size: 2rem;
-    color: #ccc; /* Default gray color */
+    color: #ccc; 
     cursor: pointer;
     transition: color 0.3s ease, transform 0.3s ease;
 }
 
 .like-icon.liked {
-    color: #e63946; /* Bright red when liked */
-    transform: scale(1.2); /* Slightly enlarge when liked */
+    color: #e63946; 
+    transform: scale(1.2); 
 }
 
 .like-count {
@@ -380,8 +483,8 @@
 
 /* Hover Effect */
 .like-icon:hover {
-    color: #922edf; /* Purple hover effect */
-    transform: scale(1.1); /* Slight enlargement on hover */
+    color: #922edf;
+    transform: scale(1.1); 
 }
 
 /* Responsive Design */
@@ -568,4 +671,5 @@
         padding: 8px 15px;
     }
 }
+
 

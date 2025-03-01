@@ -331,7 +331,7 @@
     padding: 30px;
     border-radius: 20px;
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-    width: 70%; /* Increased width for better usability */
+    width: 70%; 
     max-width: 800px;
     z-index: 1000;
 }
@@ -410,7 +410,9 @@
 
 
 
-/* ---------------------------------------Post Detail Container -----------------------------------------*/
+/* ---------------------------------- POST DETAIL VIEW STYLES ------------------------------- */
+
+/* Post Detail Container */
 .post-detail-container {
     width: 100%;
     max-width: 900px;
@@ -420,7 +422,6 @@
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     font-family: 'Arial', sans-serif;
-    position: relative; /* Ensures that the delete button is positioned relative to this container */
 }
 
 /* Post Content */
@@ -463,33 +464,137 @@
     margin-top: 20px;
 }
 
-/* Delete button inside the post container with purple box */
+/* Post Actions (Edit & Delete Button Container) */
+.post-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+
+.edit-post-btn, 
 .delete-post-btn {
+    background-color: #922edf; 
+    border: none;
+    color: white; 
+    cursor: pointer;
+    border-radius: 12px; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+
+    
+    width: 60px;  
+    height: 50px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0; 
+}
+
+
+.edit-post-btn i,
+.delete-post-btn i {
+    font-size: 22px; 
+    line-height: 1;
+}
+
+
+.edit-post-btn img, 
+.delete-post-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+
+.edit-post-btn svg,
+.delete-post-btn svg {
+    width: 24px;  
+    height: 24px;
+}
+
+
+.edit-post-btn i,
+.delete-post-btn i {
+    font-size: 1.2rem;
+}
+
+.edit-post-btn:hover, 
+.delete-post-btn:hover {
+    background-color: #7a2b9e;
+    transform: scale(1.1);
+}
+
+.edit-post-btn:active, 
+.delete-post-btn:active {
+    background-color: #5c1b7f;
+    transform: scale(0.95);
+}
+
+/* ---------------------------------- POST DETAIL VIEW STYLES (FOR EDIT) ------------------------------- */
+
+/* Container for edit mode */
+.edit-post-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Title and Body Edit Inputs */
+.edit-title-input {
+    width: 100%;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 8px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+    transition: border 0.3s ease-in-out;
+}
+
+.edit-body-textarea {
+    width: 100%;
+    font-size: 16px;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    min-height: 80px;
+    outline: none;
+    resize: vertical;
+    transition: border 0.3s ease-in-out;
+}
+
+/* Edit & Save Button Wrapper */
+.edit-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Edit & Save Buttons */
+.edit-post-btn, 
+.save-post-btn {
     background-color: #922edf; 
     border: none;
     color: white; 
     font-size: 1rem; 
     cursor: pointer;
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    padding: 8px 18px; /* Added padding for a better clickable area */
-    margin: 8px;
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    margin-top: 5px;
+    padding: 8px 18px;
+    border-radius: 8px; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-/* Hover effect for delete button */
-.delete-post-btn:hover {
-    background-color: #7a2b9e; /* Darker purple on hover */
-    transform: scale(1.1); /* Slight enlarge on hover */
+.edit-post-btn:hover, 
+.save-post-btn:hover {
+    background-color: #7a2b9e;
+    transform: scale(1.1);
 }
 
-/* Active/Pressed effect */
-.delete-post-btn:active {
-    background-color: #5c1b7f; /* Even darker purple when clicked */
-    transform: scale(0.95); /* Slight shrink for click feedback */
+.edit-post-btn:active, 
+.save-post-btn:active {
+    background-color: #5c1b7f;
+    transform: scale(0.95);
 }
 
 /* Like Area Styling */
@@ -508,14 +613,14 @@
 
 .like-icon {
     font-size: 2rem;
-    color: #ccc; /* Default gray color */
+    color: #ccc; 
     cursor: pointer;
     transition: color 0.3s ease, transform 0.3s ease;
 }
 
 .like-icon.liked {
-    color: #e63946; /* Bright red when liked */
-    transform: scale(1.2); /* Slightly enlarge when liked */
+    color: #e63946;
+    transform: scale(1.2); 
 }
 
 .like-count {
@@ -526,8 +631,8 @@
 
 /* Hover Effect */
 .like-icon:hover {
-    color: #922edf; /* Purple hover effect */
-    transform: scale(1.1); /* Slight enlargement on hover */
+    color: #922edf; 
+    transform: scale(1.1); 
 }
 
 /* Responsive Design */

@@ -1,5 +1,5 @@
 import { formattedDate} from "./functions.js";
-import { getAllPosts, getPostsByFollowed, getPostByID ,sendPost, deletePost} from "./functions.js";
+import { getAllPosts, getPostsByFollowed, getPostByID ,sendPost, deletePost, updatePost} from "./functions.js";
 import { getCommentsByPostID, createComment, deleteComment } from "./functions.js";
 import { initialLikeStatus, likePost, unlikePost } from "./functions.js";
 
@@ -314,15 +314,27 @@ export async function getPostDetail(id) {
 
             // Conditionally render the delete button
             if (post.user.username === loggedInUser) {
+                const postActionsContainer = document.createElement('div');
+                postActionsContainer.classList.add('post-actions');
+            
+                // Edit Button
+                const editButton = document.createElement('button');
+                editButton.classList.add('edit-post-btn');
+                editButton.innerHTML = '<i class="fas fa-edit"></i>';
+                editButton.addEventListener('click', () => enableEditMode(post, newDiv));
+            
+                // Delete Button
                 const postDeleteButton = document.createElement('button');
                 postDeleteButton.classList.add('delete-post-btn');
                 postDeleteButton.innerHTML = '<i class="fas fa-trash"></i>';
                 postDeleteButton.addEventListener('click', async () => {
                     await deletePost(post.id);
-                    // relaod the page after deleting the post
                     window.location.reload(); 
                 });
-                newDiv.appendChild(postDeleteButton);
+            
+                postActionsContainer.appendChild(editButton);
+                postActionsContainer.appendChild(postDeleteButton);
+                newDiv.appendChild(postActionsContainer);
             }
 
             postDetailViewContainer.appendChild(newDiv);
@@ -352,6 +364,70 @@ export async function getPostDetail(id) {
     } catch (error) {
         alert(`Failed to fetch post: ${error}`);
     }
+}
+
+function enableEditMode(post, postContainer) {
+    // Find existing post elements
+    const postTitle = postContainer.querySelector('.post-title');
+    const postBody = postContainer.querySelector('.post-body');
+    const editButton = postContainer.querySelector('.edit-post-btn'); 
+
+    // Hide the edit button
+    if (editButton) {
+        editButton.style.display = 'none';
+    }
+
+    // Replace with input fields
+    const titleInput = document.createElement('input');
+    titleInput.type = 'text';
+    titleInput.value = post.title;
+    titleInput.classList.add('edit-title-input');
+
+    const bodyTextarea = document.createElement('textarea');
+    bodyTextarea.value = post.body;
+    bodyTextarea.classList.add('edit-body-textarea');
+
+    postTitle.replaceWith(titleInput);
+    postBody.replaceWith(bodyTextarea);
+
+    // Add Save button
+    const saveButton = document.createElement('button');
+    saveButton.classList.add('save-post-btn');
+    saveButton.innerText = 'Save';
+    saveButton.addEventListener('click', async () => {
+        await saveEditedPost(post.id, titleInput.value, bodyTextarea.value, postContainer);
+        
+        // Show edit button again after saving
+        if (editButton) {
+            editButton.style.display = 'inline-block';
+        }
+    });
+
+    // Append Save button
+    postContainer.appendChild(saveButton);
+}
+
+// Function to save the edited post
+async function saveEditedPost(postid, titleInputvalue, bodyTextareavalue, postContainer){
+    const updatedPost = await updatePost(postid, titleInputvalue, bodyTextareavalue, postContainer)
+
+    // Restore the updated post view
+    postContainer.querySelector('.edit-title-input').replaceWith(
+        Object.assign(document.createElement('h2'), { 
+            className: 'post-title', 
+            innerText: updatedPost.title 
+        })
+    );
+
+    postContainer.querySelector('.edit-body-textarea').replaceWith(
+        Object.assign(document.createElement('p'), { 
+            className: 'post-body', 
+            innerText: updatedPost.body 
+        })
+    );
+
+    // Remove Save button
+    postContainer.querySelector('.save-post-btn').remove();
 }
 
 

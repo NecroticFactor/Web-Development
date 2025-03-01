@@ -150,7 +150,6 @@ async function renderUserDetails(details) {
     // Handle follow button toggle
     async function followToggle(account_type, follow_status) {
         const status = follow_status?.status?.toLowerCase(); 
-        console.log(status);
 
         // Define a mapping of statuses to button text
         const buttonLabels = {
@@ -220,8 +219,8 @@ async function renderUserDetails(details) {
         followButton.addEventListener('click', async () => {
             // Call followUser function
             await followUser(details.id);
-            // Re-render the user details to update the follow status  
-            renderUserDetails(details);  
+            // Re-render the user details to update the follow status
+            userLoader(details.username)  
         });
     }
 
@@ -232,7 +231,7 @@ async function renderUserDetails(details) {
             // Call followUser function
             await unfollowUser(details.id);
             // Re-render the user details to update the follow status  
-            renderUserDetails(details);  
+            userLoader(details.username) 
         });
     }
 }

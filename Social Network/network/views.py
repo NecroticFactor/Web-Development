@@ -607,7 +607,7 @@ class FollowViewSet(viewsets.ModelViewSet):
     
     def destroy(self, request, pk=None, *args, **kwargs):
         # Get the followed user using pk from URL
-        followed_user = get_object_or_404(User, id=pk)  # `pk` is the followed user's ID in the URL
+        followed_user = get_object_or_404(User, id=pk) 
         
         # Get the follow object
         follow = get_object_or_404(Follow, follower=request.user, followed=followed_user)
